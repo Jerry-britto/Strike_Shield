@@ -54,9 +54,9 @@ export default function Navbar() {
             </button>
             <Drawer onClose={toggleOpen} open={open} anchor="right">
               <ul className="list-none flex flex-col gap-4 p-14">
-                <li className="font-semibold cursor-pointer">Home</li>
-                <li className="font-semibold cursor-pointer">About Us</li>
-                <li className="font-semibold cursor-pointer">Contact Us</li>
+                <li className="font-semibold cursor-pointer hover:text-orange-500">Home</li>
+                <li className="font-semibold cursor-pointer hover:text-orange-500">About Us</li>
+                <li className="font-semibold cursor-pointer hover:text-orange-500">Contact Us</li>
               </ul>
               <Divider />
 
