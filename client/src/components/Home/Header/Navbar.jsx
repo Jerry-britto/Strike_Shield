@@ -1,8 +1,9 @@
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Badge, Divider, Drawer } from "@mui/material";
-import logo from "../../assets/LOGO.png";
+import logo from "../../../assets/LOGO.png";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useState } from "react";
+import { NavLink } from "react-router-dom";
 export default function Navbar() {
   const [open, setOpen] = useState(false);
 
@@ -17,9 +18,9 @@ export default function Navbar() {
           <img src={logo} alt="LOGO" width={"100"} />
         </div>
         <div className="flex gap-5">
-          <div className="cursor-pointer font-medium text-lg hover:text-orange-500 lg:block hidden">
+          <NavLink to={"/"} className="cursor-pointer font-medium text-lg hover:text-orange-500 lg:block hidden">
             Home
-          </div>
+          </NavLink>
           <div className="cursor-pointer font-medium text-lg hover:text-orange-500 lg:block hidden">
             About Us
           </div>
@@ -40,9 +41,9 @@ export default function Navbar() {
               Search
             </button>
           </div>
-          <div className="font-semibold text-lg border p-2 box-border rounded-xl cursor-pointer lg:block hidden bg-orange-500 text-black">
-            Login/Register
-          </div>
+          <NavLink to={"/login"} className="font-semibold text-lg border p-2 box-border rounded-xl cursor-pointer lg:block hidden bg-orange-500 text-black">
+            Login
+          </NavLink>
           <div className="font-medium mt-2 cursor-pointer hidden lg:block">
             <Badge badgeContent={4} color="primary">
               <ShoppingCartIcon style={{ fontSize: "30px" }} />
@@ -60,9 +61,9 @@ export default function Navbar() {
               </ul>
               <Divider />
 
-              <button className="rounded-md mx-12 p-3 mt-4 text-black font-semibold bg-orange-600 ">
-                Login/Register
-              </button>
+              <NavLink to={"/login"} className="rounded-md mx-12 p-3 mt-4 text-black font-semibold bg-orange-600 ">
+                Login
+              </NavLink>
             </Drawer>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { NavLink } from "react-router-dom";
 
 export default function Register() {
   const {
@@ -132,9 +133,18 @@ export default function Register() {
 
         <p className="mt-4 text-lg">
           Already Registered -{" "}
-          <span className="text-orange-600 underline cursor-pointer hover:text-blue-600">
+          <NavLink
+            to={"/login"}
+            className="text-orange-600 underline cursor-pointer hover:text-blue-600"
+          >
             Login
-          </span>
+          </NavLink>
+        </p>
+        <p className="text-lg mt-4">
+          Visit{" "}
+          <NavLink to={"/"} className={"text-blue-600 hover:text-orange-500"}>
+            Home
+          </NavLink>
         </p>
       </div>
       <ToastContainer />

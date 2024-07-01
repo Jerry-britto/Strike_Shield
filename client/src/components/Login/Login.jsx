@@ -1,6 +1,8 @@
 import React from "react";
 import logo from "../../assets/shopping.png";
 import { useForm } from "react-hook-form";
+import { NavLink } from "react-router-dom";
+
 
 export default function Login() {
   const { register, handleSubmit,formState: { errors } } = useForm();
@@ -48,9 +50,12 @@ export default function Login() {
 
           <p className="text-lg font-semibold mt-6">
             New User{" "}
-            <span className="hover:underline hover:cursor-pointer text-blue-600">
+            <NavLink to={"/register"} className="hover:underline hover:cursor-pointer text-blue-600">
               Sign up
-            </span>
+            </NavLink>
+          </p>
+          <p className="text-lg mt-4">
+            Visit <NavLink to={"/"} className={"text-blue-600 hover:text-orange-500"}>Home</NavLink>
           </p>
         </div>
       </div>
