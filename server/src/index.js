@@ -19,6 +19,6 @@ connectToDb()
     app.on("error", function (error) {
       //this is done to ensure whether our express app is able to respond to db or not
       console.log("Not able to connect with db");
-      throw error;
+      process.exit(1)
     });
   });

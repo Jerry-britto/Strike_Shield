@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    cart: [
+    carts: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
@@ -41,9 +41,9 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.methods.isPasswordCorrect = async function(password){
-  return await bcrypt.compare(password,this.password)
-}
+userSchema.methods.isPasswordCorrect = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
 
 userSchema.methods.generateToken = function () {
   return jwt.sign(
@@ -55,6 +55,16 @@ userSchema.methods.generateToken = function () {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
     }
   );
+};
+
+userSchema.methods.addToCart = async function (cartItem) {
+  try {
+    this.carts = this.carts.concat(cartItem);
+    await this.save();
+    return this.carts;
+  } catch (error) {
+    console.log("Could not add to cart due to " + error.message);
+  }
 };
 
 export const User = mongoose.model("User", userSchema);

@@ -7,7 +7,8 @@ const productSchema = new Schema(
             required:true
         },
         description:{
-            type:String
+            type:String,
+            required:true
         },
         stock:{
             type:Number,
@@ -26,6 +27,7 @@ const productSchema = new Schema(
         },
         coverImage:{
             type:String,
+            required:[true,"cover image is required"]
         }
     },
     {timestamps:true}
