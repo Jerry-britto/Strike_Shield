@@ -1,32 +1,91 @@
-import React from "react";
-import { TextField } from "@mui/material";
+import React, { useState } from "react";
+import { Box, CircularProgress, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { NavLink } from "react-router-dom";
+import Axios from "axios";
 
 export default function Register() {
   const {
     register,
     handleSubmit,
+    reset,
+    getValues,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    first_name: "",
+    last_name: "",
+    email: "",
+    address: "",
+    password: "",
+    cpassword: "",
+  });
 
-  const onSubmit = (data) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    setIsButtonDisabled(true);
     if (data.password !== data.cpassword) {
       console.log("dfd");
       toast.error("Your passwords are not matching", {
         position: "top-center",
         autoClose: 3000,
       });
+      setIsLoading(false);
+      setIsButtonDisabled(false);
       return;
     }
-    console.log(data);
+    console.log("submission data" + data);
+    let values = getValues();
+    try {
+      console.log("values before submitting", values);
+      const res = await Axios.post(
+        `http://localhost:8000/api/v1/user/register`,
+        data
+      );
+      if (res.status === 200) {
+        toast.success("User Registered succesfully", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+        reset();
+      }
+      console.log("data sent after registration " + data);
+      console.log("values after submitting", values);
+      
+      setIsLoading(false);
+      setIsButtonDisabled(false);
+    } catch (error) {
+      console.log("Error occured due to " + error.message);
+      toast.error("Signup failed, Please try again", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+      reset();
+      setIsLoading(false);
+      setIsButtonDisabled(false);
+    }
   };
 
   return (
     <div className="bg-[url('https://img.freepik.com/free-photo/paper-shopping-bags-dark-background-top-view_169016-43743.jpg')] bg-cover bg-center min-h-screen flex justify-center items-center">
-      <div className="flex flex-col items-center mx-auto backdrop-blur-sm bg-white/70 py-8 sm:p-12 rounded-2xl shadow-2xl">
+      <div className=" relative flex flex-col items-center mx-auto backdrop-blur-sm bg-white/70 py-8 sm:p-12 rounded-2xl shadow-2xl">
+        {isLoading && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: "35%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 10,
+            }}
+          >
+            <CircularProgress size={"250px"} />
+          </Box>
+        )}
+
         <h1 className="text-3xl font-bold italic">
           {" "}
           <span className="text-orange-500">Create</span> an account
@@ -127,6 +186,7 @@ export default function Register() {
           <input
             type="submit"
             value="Register"
+            disabled={isButtonDisabled}
             className="w-full bg-orange-500 p-4 rounded-xl text-black font-bold hover:text-white my-4 text-xl cursor-pointer shadow-lg"
           />
         </form>

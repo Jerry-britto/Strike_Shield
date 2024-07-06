@@ -1,14 +1,49 @@
-import React from "react";
+import React, { useEffect } from "react";
 import logo from "../../assets/shopping.png";
 import { useForm } from "react-hook-form";
-import { NavLink } from "react-router-dom";
-
+import { NavLink, useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import Axios from "axios";
+import { addUser, setRole } from "../../store/slice.js";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function Login() {
-  const { register, handleSubmit,formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-  const onSubmit = (data) => {
+  const history = useNavigate();
+  const dispath = useDispatch();
+  const user = useSelector((state) => state.user);
+
+  useEffect(() => {
+    console.log("from use effect ");
+    console.table(user);
+  }, [user]);
+
+  const login = async (data) => {
     console.log(data);
+    try {
+      const res = await Axios.post(
+        "http://localhost:8000/api/v1/user/login",
+        data
+      );
+      if (res.status === 200) {
+        console.log("response " + res);
+        console.log("data received" + res);
+        const { user } = res.data;
+        dispath(addUser(user));
+        history("/");
+      }
+    } catch (error) {
+      console.log("Login failed due to " + error);
+      toast.error("Login Fail, Please try again", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    }
   };
 
   return (
@@ -23,7 +58,7 @@ export default function Login() {
             {" "}
             <span className="text-orange-600">Welcome</span> Back
           </h1>
-          <form method="POST" onSubmit={handleSubmit(onSubmit)}>
+          <form method="POST" onSubmit={handleSubmit(login)}>
             <input
               type="email"
               className="p-2 rounded-lg w-full my-2"
@@ -31,7 +66,9 @@ export default function Login() {
               {...register("email", { required: true })}
             />
             {errors.email && (
-              <span className="text-red-500 my-1 text-sm">Email is required</span>
+              <span className="text-red-500 my-1 text-sm">
+                Email is required
+              </span>
             )}
             <input
               type="password"
@@ -40,7 +77,9 @@ export default function Login() {
               {...register("password", { required: true })}
             />
             {errors.password && (
-              <span className="text-red-500 text-sm my-1">Password is required</span>
+              <span className="text-red-500 text-sm my-1">
+                Password is required
+              </span>
             )}
 
             <button className="bg-orange-600 text-white font-bold p-2 rounded-md w-full my-4 text-2xl">
@@ -50,15 +89,22 @@ export default function Login() {
 
           <p className="text-lg font-semibold mt-6">
             New User{" "}
-            <NavLink to={"/register"} className="hover:underline hover:cursor-pointer text-blue-600">
+            <NavLink
+              to={"/register"}
+              className="hover:underline hover:cursor-pointer text-blue-600"
+            >
               Sign up
             </NavLink>
           </p>
           <p className="text-lg mt-4">
-            Visit <NavLink to={"/"} className={"text-blue-600 hover:text-orange-500"}>Home</NavLink>
+            Visit{" "}
+            <NavLink to={"/"} className={"text-blue-600 hover:text-orange-500"}>
+              Home
+            </NavLink>
           </p>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }

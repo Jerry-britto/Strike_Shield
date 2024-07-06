@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema(
       min: [6, "Password too short"],
       trim: true,
     },
+    address: {
+      type: String,
+      required: [true, "Address is required"],
+    },
     isAdmin: {
       type: Boolean,
       default: false,
@@ -37,6 +41,13 @@ const userSchema = new mongoose.Schema(
         ref: "Product",
       },
     ],
+    tokens: [
+      {
+        token: {
+          type: String,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -45,8 +56,8 @@ userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.generateToken = function () {
-  return jwt.sign(
+userSchema.methods.generateToken = async function () {
+  const token = jwt.sign(
     {
       _id: this._id,
     },
@@ -55,6 +66,9 @@ userSchema.methods.generateToken = function () {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
     }
   );
+  this.tokens = this.tokens.concat({ token: token });
+  await this.save();
+  return token;
 };
 
 userSchema.methods.addToCart = async function (cartItem) {

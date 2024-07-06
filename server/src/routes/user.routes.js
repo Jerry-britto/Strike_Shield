@@ -5,7 +5,6 @@ import {
   registerUser,
   validUser,
 } from "../controllers/user.controller.js";
-import verifyUser from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
@@ -13,8 +12,8 @@ router.route("/register").post(registerUser);
 
 router.route("/login").post(loginUser);
 
-router.route("/logout").post(verifyUser, logoutUser);
+router.route("/logout").post(logoutUser);
 
-router.route("/validuser").get(verifyUser, validUser);
+router.route("/validuser").get(validUser);
 
 export default router;
