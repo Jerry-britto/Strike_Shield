@@ -28,7 +28,13 @@ const productSchema = new Schema(
         coverImage:{
             type:String,
             required:[true,"cover image is required"]
-        }
+        },
+        review:[
+            {
+                type:Schema.Types.ObjectId,
+                ref:"Review"
+            }
+        ]
     },
     {timestamps:true}
 )

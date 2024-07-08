@@ -137,12 +137,14 @@ export default function Navbar() {
                 </MenuItem>
               </Menu>
 
+              <NavLink to={"/carts"} >
               <Badge
                 badgeContent={`${user[0].carts.length || ""}`}
                 color="primary"
               >
                 <ShoppingCartIcon style={{ fontSize: "30px" }} />
               </Badge>
+              </NavLink>
             </div>
           )}
 
