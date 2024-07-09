@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, CircularProgress, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Axios from "axios";
+import { getUser } from "../../utils/verifyUser";
 
 export default function Register() {
   const {
@@ -24,6 +25,15 @@ export default function Register() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const history = useNavigate()
+
+  useEffect(()=>{
+    const user = getUser()
+    if(user){
+      history("/")
+    }
+  })
+
   const onSubmit = async (data) => {
     setIsLoading(true);
     setIsButtonDisabled(true);

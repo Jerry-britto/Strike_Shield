@@ -3,22 +3,35 @@ import { Avatar, Badge, Divider, Drawer, Menu, MenuItem } from "@mui/material";
 import logo from "../../../assets/LOGO.png";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { NavLink, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { removeUser, removeRole } from "../../../store/slice.js";
+import { getUser } from "../../../utils/verifyUser.js";
 
 export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const user = useSelector((state) => state.user);
-  const dispatch = useDispatch();
+  const [user, setUser] = useState();
+  const [cartCount, setCartCount] = useState(0);
 
+  const loguser = getUser();
+  const navigate = useNavigate();
+
+  // to add user and its cart count
   useEffect(() => {
-    console.log("logged in user in home page" + user?.length);
-  }, [user]);
+    if (loguser) {
+      setUser(loguser);
+      setCartCount(loguser.carts.length)
+      console.log("user in home page");
+    }
+  }, []);
+
+  // for testing whether user is logged in or not
+  useEffect(() => {
+    console.log("logged in user in home page");
+    console.log(user);
+  }, [user && user.length > 0]);
 
   const toggleOpen = () => {
     setDrawerOpen((prev) => !prev);
@@ -26,10 +39,13 @@ export default function Navbar() {
 
   // for handling menu after login
   const [anchorEl, setAnchorEl] = useState(null);
+
   const open = Boolean(anchorEl);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -39,7 +55,7 @@ export default function Navbar() {
     try {
       const res = await Axios.post(
         "http://localhost:8000/api/v1/user/logout",
-        { token: user[0].tokens[0].token },
+        { token: user.tokens[0].token },
         {
           headers: {
             "Content-Type": "application/json", // Ensuring the content type is set to JSON
@@ -47,16 +63,16 @@ export default function Navbar() {
           withCredentials: true, // If you need to include cookies
         }
       );
-      console.log(res)
+      console.log(res);
 
-      if (res.status >= 200 && res.status<=300) {
-        dispatch(removeUser());
-        dispatch(removeRole());
-
+      if (res.status >= 200 && res.status <= 300) {
+        localStorage.removeItem("user");
+        setUser();
         toast.success("User logged out", {
           position: "top-center",
           autoClose: 3000,
         });
+        navigate("/");
       }
     } catch (error) {
       console.log("could not logout due to ", error.message);
@@ -100,7 +116,7 @@ export default function Navbar() {
               Search
             </button>
           </div>
-          {user.length === 0 ? (
+          {!user ? (
             <NavLink
               to={"/login"}
               className="font-semibold text-lg border p-2 box-border rounded-xl cursor-pointer lg:block hidden bg-orange-500 text-black"
@@ -116,8 +132,8 @@ export default function Navbar() {
                 aria-expanded={open ? "true" : undefined}
                 onClick={handleClick}
               >
-                {user[0].first_name[0].toUpperCase()}
-                {user[0].last_name[0].toUpperCase()}
+                {user && user.first_name[0].toUpperCase()}
+                {user && user.last_name[0].toUpperCase()}
               </Avatar>
 
               <Menu
@@ -137,13 +153,21 @@ export default function Navbar() {
                 </MenuItem>
               </Menu>
 
-              <NavLink to={"/carts"} >
-              <Badge
-                badgeContent={`${user[0].carts.length || ""}`}
-                color="primary"
-              >
-                <ShoppingCartIcon style={{ fontSize: "30px" }} />
-              </Badge>
+              <NavLink to={"/carts"}>
+                {cartCount != 0 ? (
+                  <Badge
+                    badgeContent={`${cartCount || null}`}
+                    color="primary"
+                  >
+                    <ShoppingCartIcon style={{ fontSize: "30px" }} />
+                  </Badge>
+                ) : (
+                  <Badge
+                  color="primary"
+                >
+                  <ShoppingCartIcon style={{ fontSize: "30px" }} />
+                </Badge>
+                )}
               </NavLink>
             </div>
           )}
@@ -154,9 +178,12 @@ export default function Navbar() {
             </button>
             <Drawer onClose={toggleOpen} open={drawerOpen} anchor="right">
               <ul className="list-none flex flex-col gap-4 p-14">
-                <li className="font-semibold cursor-pointer hover:text-orange-500">
+                <NavLink
+                  to={"/"}
+                  className="font-semibold cursor-pointer hover:text-orange-500"
+                >
                   Home
-                </li>
+                </NavLink>
                 <li className="font-semibold cursor-pointer hover:text-orange-500">
                   About Us
                 </li>
@@ -166,7 +193,7 @@ export default function Navbar() {
               </ul>
               <Divider />
 
-              {user.length === 0 ? (
+              {!user ? (
                 <NavLink
                   to={"/login"}
                   className="text-center rounded-md mx-12 p-3 mt-4 text-white font-semibold bg-orange-600 "

@@ -4,8 +4,7 @@ import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import Axios from "axios";
-import { addUser, setRole } from "../../store/slice.js";
-import { useDispatch, useSelector } from "react-redux";
+import { getUser, setUser } from "../../utils/verifyUser.js";
 
 export default function Login() {
   const {
@@ -15,13 +14,13 @@ export default function Login() {
   } = useForm();
 
   const history = useNavigate();
-  const dispath = useDispatch();
-  const user = useSelector((state) => state.user);
 
-  useEffect(() => {
-    console.log("from use effect ");
-    console.table(user);
-  }, [user]);
+  useEffect(()=>{
+    const user = getUser()
+    if(user){
+      history("/")
+    }
+  })
 
   const login = async (data) => {
     console.log(data);
@@ -32,9 +31,10 @@ export default function Login() {
       );
       if (res.status === 200) {
         console.log("response " + res);
-        console.log("data received" + res);
         const { user } = res.data;
-        dispath(addUser(user));
+        console.log("User-", user);
+        console.log("User Token  ", user.tokens[0].token);
+        setUser(user);
         history("/");
       }
     } catch (error) {

@@ -1,7 +1,7 @@
 import Home from "./pages/Home/Home.jsx";
 import Login from "./components/Login/Login.jsx";
 import Register from "./components/Register/Register.jsx";
-import Layout from "./Outlet/Layout.jsx";
+import Layout from "./layout/Layout.jsx";
 import CartPage from "./pages/Product/CartPage.jsx";
 import ViewProduct from "./pages/Product/ViewProduct.jsx";
 import {

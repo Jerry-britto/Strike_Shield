@@ -1,7 +1,23 @@
 import React, { useState, useEffect } from "react";
 import CartItem from "../../components/Card/CartItem";
+import { useNavigate } from "react-router-dom";
+import { getUser } from "../../utils/verifyUser.js";
 
 export default function CartPage() {
+  const navigateUser = useNavigate();
+  const [cart, setCart] = useState(0);
+
+  useEffect(() => {
+    // to check if the user is logged in or not
+    const user = getUser();
+    if (!user) {
+      console.log("No Token found");
+      navigateUser("/");
+    }
+    console.log("user at cart page ", user);
+    setCart(user.carts.length);
+  });
+
   const [data, setData] = useState([
     {
       imageLink:
@@ -54,21 +70,28 @@ export default function CartPage() {
 
   return (
     <div className="my-10">
-      <h1 className="text-4xl font-bold text-center">Your Cart</h1>
-      <h2 className="text-3xl font-semibold text-center mt-2">{`Total Items : ${data.length}`}</h2>
-      {data.map((ele, idx) => (
-        <CartItem
-          key={ele.imageLink}
-          coverImage={ele.imageLink}
-          name={ele.name}
-          qty={ele.qty}
-          price={ele.price}
-          onChange={(event)=>handleQtyChange(event,idx)}
-        />
-      ))}
-      <div className="text-3xl  text-center font-semibold">
-        {`Total Amount: ${totalAmnt}`}
-      </div>
+      <h2 className="text-3xl font-semibold text-center mt-2">{`Total Items : ${cart}`}</h2>
+      {cart === 0 ? (
+        <div className=" font-bold text-6xl my-80 flex justify-center min-h-screen">
+          No Items in the cart
+        </div>
+      ) : (
+        <>
+          {data.map((ele, idx) => (
+            <CartItem
+              key={ele.imageLink}
+              coverImage={ele.imageLink}
+              name={ele.name}
+              qty={ele.qty}
+              price={ele.price}
+              onChange={(event) => handleQtyChange(event, idx)}
+            />
+          ))}
+          <div className="text-3xl  text-center font-semibold">
+            {`Total Amount: ${totalAmnt}`}
+          </div>
+        </>
+      )}
     </div>
   );
 }
