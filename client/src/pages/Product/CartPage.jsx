@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CartItem from "../../components/Card/CartItem";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default function CartPage() {
   const [data, setData] = useState([
@@ -32,6 +34,16 @@ export default function CartPage() {
       qty: 2,
     },
   ]);
+
+  const user = useSelector(state=>state.user)
+  const navigate = useNavigate()
+
+  useEffect(()=>{
+    if(user && user.length === 0){
+      navigate("/")
+    }
+  })
+
   const [totalAmnt, setTotalAmt] = useState(0);
 
   useEffect(() => {

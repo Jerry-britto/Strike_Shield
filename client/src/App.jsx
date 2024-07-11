@@ -10,12 +10,17 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
 } from "react-router-dom";
+import Admin from "./pages/Home/Admin.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
+      </Route>
+
+      <Route path="/admin" element={<Layout />}>
+        <Route index element={<Admin/>} />
       </Route>
 
       <Route path="/carts" element={<Layout />}>

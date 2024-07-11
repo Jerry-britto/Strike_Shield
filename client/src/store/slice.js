@@ -16,15 +16,9 @@ export const ecommSlice = createSlice({
         removeUser:function(state,_){
             state.user.pop();
         },
-        setRole:function(state,action){
-            state.role = action.payload;
-        },
-        removeRole:function(state,_){
-            state.role = ""
-        }
     }
 })
 
-export const {addUser,removeUser,setRole,removeRole} = ecommSlice.actions;
+export const {addUser,removeUser} = ecommSlice.actions;
 
 export default ecommSlice.reducer;

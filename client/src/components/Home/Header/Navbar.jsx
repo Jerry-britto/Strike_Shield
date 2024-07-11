@@ -3,17 +3,18 @@ import { Avatar, Badge, Divider, Drawer, Menu, MenuItem } from "@mui/material";
 import logo from "../../../assets/LOGO.png";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink,useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { removeUser, removeRole } from "../../../store/slice.js";
+import { removeUser } from "../../../store/slice.js";
 
 export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const user = useSelector((state) => state.user);
+  const navigate =useNavigate()
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -39,24 +40,19 @@ export default function Navbar() {
     try {
       const res = await Axios.post(
         "http://localhost:8000/api/v1/user/logout",
-        { token: user[0].tokens[0].token },
-        {
-          headers: {
-            "Content-Type": "application/json", // Ensuring the content type is set to JSON
-          },
-          withCredentials: true, // If you need to include cookies
-        }
+        {},
+        {withCredentials:true}
       );
       console.log(res)
 
       if (res.status >= 200 && res.status<=300) {
         dispatch(removeUser());
-        dispatch(removeRole());
 
         toast.success("User logged out", {
           position: "top-center",
           autoClose: 3000,
         });
+        navigate("/")
       }
     } catch (error) {
       console.log("could not logout due to ", error.message);
@@ -66,6 +62,19 @@ export default function Navbar() {
       });
     }
   };
+
+  const validUser = async()=>{
+    try {
+      const res = await Axios.get("http://localhost:8000/api/v1/user/validuser",{withCredentials:true})
+
+      if(res.status === 200){
+        console.log(res.data.user);
+      }
+    } catch (error) {
+      console.log(error.message)
+      
+    }
+  }
 
   return (
     <div>
@@ -154,10 +163,10 @@ export default function Navbar() {
             </button>
             <Drawer onClose={toggleOpen} open={drawerOpen} anchor="right">
               <ul className="list-none flex flex-col gap-4 p-14">
-                <li className="font-semibold cursor-pointer hover:text-orange-500">
+                <NavLink to={"/"} className="font-semibold cursor-pointer hover:text-orange-500">
                   Home
-                </li>
-                <li className="font-semibold cursor-pointer hover:text-orange-500">
+                </NavLink>
+                <li onClick={validUser} className="font-semibold cursor-pointer hover:text-orange-500">
                   About Us
                 </li>
                 <li className="font-semibold cursor-pointer hover:text-orange-500">

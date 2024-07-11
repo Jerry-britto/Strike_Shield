@@ -66,8 +66,6 @@ userSchema.methods.generateToken = async function () {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
     }
   );
-  this.tokens = this.tokens.concat({ token: token });
-  await this.save();
   return token;
 };
 

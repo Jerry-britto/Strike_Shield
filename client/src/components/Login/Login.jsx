@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import Axios from "axios";
-import { addUser, setRole } from "../../store/slice.js";
+import { addUser } from "../../store/slice.js";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function Login() {
@@ -28,14 +28,20 @@ export default function Login() {
     try {
       const res = await Axios.post(
         "http://localhost:8000/api/v1/user/login",
-        data
+        data,
+        {withCredentials:true}
       );
+      console.log("response " + res);
       if (res.status === 200) {
-        console.log("response " + res);
         console.log("data received" + res);
         const { user } = res.data;
         dispath(addUser(user));
-        history("/");
+        if(user['isAdmin']){
+          history("/admin")
+        }
+        else{
+          history("/");
+        }
       }
     } catch (error) {
       console.log("Login failed due to " + error);

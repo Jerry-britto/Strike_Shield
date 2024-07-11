@@ -2,7 +2,6 @@ import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-
 export async function registerUser(req, res) {
   try {
     const { first_name, last_name, email, password, cpassword, address } =
@@ -61,6 +60,7 @@ export async function registerUser(req, res) {
     });
   } catch (error) {
     console.log("error occured due to ", error.message);
+    return res.status(500).json({ message: error.message });
   }
 }
 
@@ -97,8 +97,7 @@ export async function loginUser(req, res) {
 
     const options = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
+      secure: true,
     };
 
     const loggedInUser = await User.findById(user._id).select("-password");
@@ -110,7 +109,7 @@ export async function loginUser(req, res) {
 
     return res
       .status(200)
-      // .cookie("accessToken", accessToken, options)
+      .cookie("accessToken", accessToken, options)
       .json({
         message: `Logged In ${!loggedInUser.isAdmin ? "User" : "Admin"}`,
         user: loggedInUser,
@@ -123,42 +122,15 @@ export async function loginUser(req, res) {
 
 export async function logoutUser(req, res) {
   try {
-    console.log("request body ",req.body);
-
-    const token = req.body.token;
-
-    if (!token) {
-      console.log("not receiving token ", token);
-      return res
-        .status(401)
-        .json({ message: "Unauthorized token", success: false });
-    }
-
-    console.log("token: ", token);
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN);
-
-    const user = await User.findById(decodedToken._id).select("-password");
-
-    if (!user) {
-      return res.status(401).json({ message: "Invalid access token" });
-    }
-
-    user.tokens = user.tokens.filter((currElem) => {
-      return currElem.token !== token;
-    });
-
     const options = {
       httpOnly: true,
       secure: true,
     };
 
-    // res.clearCookie("accessToken", options);
-
-    await user.save();
-
     return res
+      .clearCookie("accessToken", options)
       .status(201)
-      .json({ message: `User ${user.email} logged out`, success: true });
+      .json({ message: `User ${req.user?.email} logged out`, success: true });
   } catch (error) {
     console.log("Logout fail due to " + error.message);
   }
@@ -166,27 +138,10 @@ export async function logoutUser(req, res) {
 
 export async function validUser(req, res) {
   try {
-    const token = req.body.token;
-
-    if (!token) {
-      console.log("not receiving token ", token);
-      return res
-        .status(401)
-        .json({ message: "Unauthorized token", success: false });
-    }
-
-    console.log("token: ", token);
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN);
-
-    const user = await User.findById(decodedToken._id).select("-password");
-
-    if (!user) {
-      return res.status(401).json({ message: "Invalid access token" });
-    }
 
     return res.status(200).json({
-      message: `Valid Logged in ${user.isAdmin ? "Admin" : "User"}`,
-      user,
+      message: `Valid Logged in ${req.user?.isAdmin ? "Admin" : "User"}`,
+      user:req.user,
     });
   } catch (error) {
     console.log("error occured while finding user", error.message);

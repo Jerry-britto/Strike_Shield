@@ -27,7 +27,8 @@ export default function Register() {
   const onSubmit = async (data) => {
     setIsLoading(true);
     setIsButtonDisabled(true);
-    if (data.password !== data.cpassword) {
+    const {password,cpassword} = data;
+    if (password !== cpassword) {
       console.log("dfd");
       toast.error("Your passwords are not matching", {
         position: "top-center",
