@@ -11,6 +11,7 @@ import {
   createRoutesFromElements,
 } from "react-router-dom";
 import Admin from "./pages/Home/Admin.jsx";
+import NotFound from "./components/404/NotFound.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -27,12 +28,14 @@ const router = createBrowserRouter(
         <Route index element={<CartPage />} />
       </Route>
 
-      <Route path="/product" element={<Layout />}>
+      <Route path="/product/:pid" element={<Layout />}>
         <Route index element={<ViewProduct />} />
       </Route>
 
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      <Route path="*" element={<NotFound/>}/>
     </>
   )
 );

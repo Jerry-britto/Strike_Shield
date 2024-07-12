@@ -14,9 +14,21 @@ export async function addProduct(req, res) {
     }
 
     console.log(req.body);
-    const { name, description, stock, price } = req.body;
+    const {
+      name,
+      description,
+      stock,
+      price,
+      shortDescription,
+      longDescription,
+      category,
+    } = req.body;
 
-    if ([name, description, stock, price].some((ele) => ele?.trim() === "")) {
+    if (
+      [name, description, stock, price, shortDescription, longDescription].some(
+        (ele) => ele?.trim() === ""
+      )
+    ) {
       return res
         .status(400)
         .json({ message: "All fields are mandatory", success: false });
@@ -49,14 +61,15 @@ export async function addProduct(req, res) {
 
     const newProduct = await Product.create({
       name,
-      description,
+      description: { shortDescription, longDescription },
       stock,
       price,
       coverImage: coverImage,
+      category: category != "" ? undefined : category,
     });
 
     const savedProduct = await Product.findById(newProduct._id).select(
-      "-category -owner"
+      "-owner"
     );
 
     if (!savedProduct) {
@@ -71,9 +84,11 @@ export async function addProduct(req, res) {
       .json({ message: "New Product added", success: true });
   } catch (error) {
     console.log("Error occured due to ", error);
+    return res.json({ message: error.message, success: false });
   }
 }
 
+// set default products
 export async function setDefaultProduct(req, res) {
   try {
     await Product.deleteMany({})
@@ -82,16 +97,21 @@ export async function setDefaultProduct(req, res) {
         throw err;
       });
 
-    await Product.insertMany(products)
+    const producsts = await Product.insertMany(products)
       .then(() => console.log("Inserted new data"))
       .catch(function (err) {
         throw err;
       });
 
-    return res
-      .status(200)
-      .json({ message: "Data inserted successfully", success: true });
-      
+    if (!products) {
+      throw new Error("Products not inserted");
+    }
+
+    return res.status(200).json({
+      message: "Data inserted successfully",
+      success: true,
+      producsts,
+    });
   } catch (error) {
     console.log("Could not insert products ", error.message);
     return res
@@ -99,3 +119,49 @@ export async function setDefaultProduct(req, res) {
       .json({ message: "Could not insert products", success: false });
   }
 }
+
+// get product by id
+export async function getProductById(req, res) {
+  try {
+    const { pid } = req.params;
+
+    if (!pid) {
+      throw new Error("Product id is required");
+    }
+
+    const product = await Product.findById(pid).select("-owner");
+
+    if (!product) {
+      throw new Error("Product does not exist");
+    }
+
+    product.views += 1;
+
+    await product.save();
+
+    return res
+      .status(200)
+      .json({ message: "Product exists", product, success: true });
+  } catch (error) {
+    return res.json({ message: error.message, success: false });
+  }
+}
+
+
+// get all products
+export async function getAllProducts(_, res) {
+  try {
+    const products = await Product.find({});
+    if (!products) {
+      throw new Error("No Products found");
+    }
+    return res
+      .status(200)
+      .json({ message: "products data", success: true, products });
+  } catch (error) {
+    return res.json({ message: error.message, success: false });
+  }
+}
+
+// get popular products based on number of orders
+
