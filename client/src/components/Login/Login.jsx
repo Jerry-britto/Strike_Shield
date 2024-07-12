@@ -18,10 +18,12 @@ export default function Login() {
   const dispath = useDispatch();
   const user = useSelector((state) => state.user);
 
-  useEffect(() => {
-    console.log("from use effect ");
-    console.table(user);
-  }, [user]);
+  useEffect(()=>{
+    if(user && user.length >0 ){
+      history("/")
+    }
+  })
+
 
   const login = async (data) => {
     console.log(data);
