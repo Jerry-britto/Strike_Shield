@@ -42,7 +42,7 @@ export async function registerUser(req, res) {
     });
 
     const savedUser = await User.findById(user._id).select(
-      "-password -carts -isAdmin"
+      "-password -isAdmin"
     );
 
     if (!savedUser) {

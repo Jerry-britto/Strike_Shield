@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { Cart } from "./cart.model.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -39,6 +40,22 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// to create a cart after the user is saved
+userSchema.post("save", async function (user, next) {
+  try {
+    const cart = await Cart.findOne({ owner: user._id });
+    if (!cart) {
+      await Cart.create({
+        owner: user._id,
+        items: [],
+      });
+    }
+  } catch (error) {
+    console.log("Error occured while creating cart ", error.message);
+  }
+  next();
+});
+
 userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
@@ -55,6 +72,5 @@ userSchema.methods.generateToken = async function () {
   );
   return token;
 };
-
 
 export const User = mongoose.model("User", userSchema);

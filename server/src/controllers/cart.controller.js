@@ -70,7 +70,7 @@ export async function addOrUpdateCart(req, res) {
   try {
     // checking whether id is valid or provided
     const { productId } = req.params;
-    const { quantity = 1 } = req.body;
+    const { quantity = 1, desc = false } = req.body;
 
     if (!productId || !mongoose.isValidObjectId(productId)) {
       throw new Error("Invalid Product id");
@@ -93,9 +93,9 @@ export async function addOrUpdateCart(req, res) {
 
     let cart = await Cart.findOne({ owner: req.user._id });
 
-    if (!cart) {
-      cart = new Cart({ owner: req.user.id });
-    }
+    // if (!cart) {
+    //   cart = new Cart({ owner: req.user.id });
+    // }
 
     // check if the product is already added to cart or not
     const addedProduct = cart.items?.find(
@@ -103,7 +103,8 @@ export async function addOrUpdateCart(req, res) {
     );
 
     if (addedProduct) {
-      addedProduct.quantity += quantity;
+      if (!desc) addedProduct.quantity += quantity;
+      else addedProduct.quantity -= quantity;
     } else {
       cart.items.push({
         productId,
@@ -111,9 +112,10 @@ export async function addOrUpdateCart(req, res) {
       });
     }
 
-    // reduce the stock of the product
-    product.stock -= quantity;
-    await product.save();
+    // taken into consideration while proceding with payment
+    // // reduce the stock of the product
+    // product.stock -= quantity;
+    // await product.save();
 
     await cart.save({ validateBeforeSave: true }); // save the cart
 
@@ -141,19 +143,21 @@ export async function deleteCartItem(req, res) {
     if (!product) {
       throw new Error("Product does not exist");
     }
+
+    // taken into consideration during payment
     // get the user's cart
-    const cart = await Cart.findOne({ owner: req.user._id });
-    console.log("\n\nCart - " + cart);
-    console.log("\n\nproduct before minimizing stock ", product);
+    // const cart = await Cart.findOne({ owner: req.user._id });
+    // console.log("\n\nCart - " + cart);
+    // console.log("\n\nproduct before minimizing stock ", product);
 
-    // increment the current stock of the product
-    const item = cart.items?.find(
-      (ele) => ele.productId.toString() === productId
-    );
-    console.log(item.quantity);
-    product.stock += item.quantity;
+    // // increment the current stock of the product
+    // const item = cart.items?.find(
+    //   (ele) => ele.productId.toString() === productId
+    // );
+    // console.log(item.quantity);
+    // product.stock += item.quantity;
 
-    console.log("\n\nproduct after minimizing stock ", product);
+    // console.log("\n\nproduct after minimizing stock ", product);
 
     const updatedCart = await Cart.findOneAndUpdate(
       {
@@ -169,7 +173,7 @@ export async function deleteCartItem(req, res) {
       { new: true }
     );
 
-    await product.save(); // save the updated stock of the product
+    //await product.save(); // save the updated stock of the product
 
     return res
       .status(200)
@@ -177,6 +181,32 @@ export async function deleteCartItem(req, res) {
   } catch (error) {
     return res.json({
       message: "Could not delete cart item",
+      problem: error.message,
+      success: false,
+    });
+  }
+}
+
+export async function clearCart(req, res) {
+  try {
+    await Cart.findOneAndUpdate(
+      { owner: req.user._id },
+      {
+        $set: {
+          items: [],
+        },
+      },
+      { new: true }
+    );
+
+    const cart = getCart(req.user._id);
+
+    return res
+      .status(200)
+      .json({ message: "Cart cleared", success: true, cart });
+  } catch (error) {
+    return res.json({
+      message: "Could not clear the cart",
       problem: error.message,
       success: false,
     });
