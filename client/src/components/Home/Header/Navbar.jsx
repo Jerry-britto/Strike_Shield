@@ -3,7 +3,7 @@ import { Avatar, Badge, Divider, Drawer, Menu, MenuItem } from "@mui/material";
 import logo from "../../../assets/LOGO.png";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useEffect, useState } from "react";
-import { NavLink,useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Axios from "axios";
@@ -12,13 +12,19 @@ import { removeUser } from "../../../store/slice.js";
 
 export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
 
   const user = useSelector((state) => state.user);
-  const navigate =useNavigate()
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
     console.log("logged in user in home page" + user?.length);
+    if (user.length > 0) {
+      setCartCount(user[0].carts.length)
+    }
+    console.log(user)
+    console.log(cartCount);
   }, [user]);
 
   const toggleOpen = () => {
@@ -41,18 +47,18 @@ export default function Navbar() {
       const res = await Axios.post(
         "http://localhost:8000/api/v1/user/logout",
         {},
-        {withCredentials:true}
+        { withCredentials: true }
       );
-      console.log(res)
+      console.log(res);
 
-      if (res.status >= 200 && res.status<=300) {
+      if (res.status >= 200 && res.status <= 300) {
         dispatch(removeUser());
 
         toast.success("User logged out", {
           position: "top-center",
           autoClose: 3000,
         });
-        navigate("/")
+        navigate("/");
       }
     } catch (error) {
       console.log("could not logout due to ", error.message);
@@ -63,18 +69,20 @@ export default function Navbar() {
     }
   };
 
-  const validUser = async()=>{
+  const validUser = async () => {
     try {
-      const res = await Axios.get("http://localhost:8000/api/v1/user/validuser",{withCredentials:true})
+      const res = await Axios.get(
+        "http://localhost:8000/api/v1/user/validuser",
+        { withCredentials: true }
+      );
 
-      if(res.status === 200){
+      if (res.status === 200) {
         console.log(res.data.user);
       }
     } catch (error) {
-      console.log(error.message)
-      
+      console.log(error.message);
     }
-  }
+  };
 
   return (
     <div>
@@ -145,14 +153,16 @@ export default function Navbar() {
                   </div>
                 </MenuItem>
               </Menu>
-
-              <NavLink to={"/carts"} >
-              <Badge
-                badgeContent={`${user[0].carts.length || ""}`}
-                color="primary"
-              >
-                <ShoppingCartIcon style={{ fontSize: "30px" }} />
-              </Badge>
+              <NavLink to={"/carts"}>
+                {cartCount == 0 ? (
+                  <Badge color="primary">
+                    <ShoppingCartIcon style={{ fontSize: "30px" }} />
+                  </Badge>
+                ) : (
+                  <Badge badgeContent={`${cartCount}`} color="primary">
+                    <ShoppingCartIcon style={{ fontSize: "30px" }} />
+                  </Badge>
+                )}
               </NavLink>
             </div>
           )}
@@ -163,10 +173,16 @@ export default function Navbar() {
             </button>
             <Drawer onClose={toggleOpen} open={drawerOpen} anchor="right">
               <ul className="list-none flex flex-col gap-4 p-14">
-                <NavLink to={"/"} className="font-semibold cursor-pointer hover:text-orange-500">
+                <NavLink
+                  to={"/"}
+                  className="font-semibold cursor-pointer hover:text-orange-500"
+                >
                   Home
                 </NavLink>
-                <li onClick={validUser} className="font-semibold cursor-pointer hover:text-orange-500">
+                <li
+                  onClick={validUser}
+                  className="font-semibold cursor-pointer hover:text-orange-500"
+                >
                   About Us
                 </li>
                 <li className="font-semibold cursor-pointer hover:text-orange-500">

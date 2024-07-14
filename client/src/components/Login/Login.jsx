@@ -37,13 +37,9 @@ export default function Login() {
       if (res.status === 200) {
         console.log("data received" + res);
         const { user } = res.data;
+        console.log(user);
         dispath(addUser(user));
-        if(user['isAdmin']){
-          history("/admin")
-        }
-        else{
-          history("/");
-        }
+        history("/");
       }
     } catch (error) {
       console.log("Login failed due to " + error);
