@@ -41,13 +41,6 @@ const userSchema = new mongoose.Schema(
         ref: "Product",
       },
     ],
-    tokens: [
-      {
-        token: {
-          type: String,
-        },
-      },
-    ],
   },
   { timestamps: true }
 );
