@@ -1,6 +1,5 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 
 export async function registerUser(req, res) {
   try {
@@ -147,9 +146,3 @@ export async function validUser(req, res) {
     console.log("error occured while finding user", error.message);
   }
 }
-
-// add to cart
-
-// remove to cart
-
-// get all cart items

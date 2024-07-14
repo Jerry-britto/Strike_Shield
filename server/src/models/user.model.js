@@ -35,19 +35,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    carts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-      },
-    ],
-    tokens: [
-      {
-        token: {
-          type: String,
-        },
-      },
-    ],
   },
   { timestamps: true }
 );
@@ -69,14 +56,5 @@ userSchema.methods.generateToken = async function () {
   return token;
 };
 
-userSchema.methods.addToCart = async function (cartItem) {
-  try {
-    this.carts = this.carts.concat(cartItem);
-    await this.save();
-    return this.carts;
-  } catch (error) {
-    console.log("Could not add to cart due to " + error.message);
-  }
-};
 
 export const User = mongoose.model("User", userSchema);
