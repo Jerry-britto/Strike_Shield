@@ -21,7 +21,7 @@ export default function Navbar() {
   useEffect(() => {
     console.log("logged in user in home page" + user?.length);
     if (user.length > 0) {
-      setCartCount(user[0].carts.length)
+      setCartCount(4)
     }
     console.log(user)
     console.log(cartCount);
@@ -54,7 +54,7 @@ export default function Navbar() {
       if (res.status >= 200 && res.status <= 300) {
         dispatch(removeUser());
 
-        toast.success("User logged out", {
+        toast.success("Logged out successfully", {
           position: "top-center",
           autoClose: 3000,
         });

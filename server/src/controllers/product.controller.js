@@ -147,7 +147,6 @@ export async function getProductById(req, res) {
   }
 }
 
-
 // get all products
 export async function getAllProducts(_, res) {
   try {
@@ -155,13 +154,20 @@ export async function getAllProducts(_, res) {
     if (!products) {
       throw new Error("No Products found");
     }
+
+    const higherViewProduct = products
+      .sort((a, b) => b.views - a.views)
+      .splice(0, 4);
+
     return res
       .status(200)
-      .json({ message: "products data", success: true, products });
+      .json({
+        message: "products data",
+        success: true,
+        higherViewProduct,
+        lowerViewProduct: products,
+      });
   } catch (error) {
     return res.json({ message: error.message, success: false });
   }
 }
-
-// get popular products based on number of orders
-
