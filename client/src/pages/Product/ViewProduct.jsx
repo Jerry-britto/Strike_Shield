@@ -3,18 +3,22 @@ import Review from "../../components/Card/Review.jsx";
 import { useParams } from "react-router-dom";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import Loader from "../../components/Loader/Loader.jsx";
 
 export default function ViewProduct() {
   const [productDetails, setProductDetails] = useState();
   const [reviews, setReviews] = useState([]);
   const { pid } = useParams();
   const [userRevew, setUserReview] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const addReview = async (e) => {
     e.preventDefault();
     try {
       if (userRevew === "") {
-        toast.warn("Kindly Provide a review before submitting a review",{position:"top-center"});
+        toast.warn("Kindly Provide a review before submitting a review", {
+          position: "top-center",
+        });
         return;
       }
 
@@ -37,26 +41,34 @@ export default function ViewProduct() {
     }
   };
 
+  const getProductData = async () => {
+    const res = await Axios.get(
+      `http://localhost:8000/api/v1/product/getproduct/${pid}`
+    );
+    const details = res.data?.product;
+    console.log(details);
+    setProductDetails(details);
+
+    const productReviews = await Axios.get(
+      `http://localhost:8000/api/v1/product/review/${pid}`
+    );
+
+    const reviewsData = productReviews.data?.reviews;
+    setReviews(reviewsData);
+    console.log("Reviews " + reviewsData);
+  };
+
   useEffect(() => {
-    (async () => {
-      const res = await Axios.get(
-        `http://localhost:8000/api/v1/product/getproduct/${pid}`
-      );
-      const details = res.data?.product;
-      // console.log(details._id);
-      setProductDetails(details);
-
-      const productReviews = await Axios.get(
-        `http://localhost:8000/api/v1/product/review/${pid}`
-      );
-
-      const reviewsData = productReviews.data?.reviews;
-      setReviews(reviewsData);
-      console.log("Reviews " + reviewsData);
-    })();
+    getProductData();
+    const timer = setTimeout(() => setIsLoading(false), 2000);
+    return () => clearTimeout(timer);
   }, []);
 
-  return (
+  return isLoading ? (
+    <div className="min-h-screen flex items-center">
+      <Loader />
+    </div>
+  ) : (
     productDetails && (
       <section class="text-gray-600 body-font overflow-hidden">
         <div class="container px-5 py-24 mx-auto">
@@ -141,10 +153,6 @@ export default function ViewProduct() {
             <h1 className="text-4xl text-center font-semibold text-black">
               Reviews
             </h1>
-            {/* <Review message="bad product" user="ryan" />
-            <Review message="good product" user="jabba" />
-            <Review message="unique product" user="eman" />
-            <Review message="stylish product" user="emanuel" /> */}
 
             {reviews && reviews.length > 0 ? (
               reviews.map((review) => {
