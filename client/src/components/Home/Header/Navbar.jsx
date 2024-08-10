@@ -23,8 +23,8 @@ export default function Navbar() {
     if (user.length > 0) {
       setCartCount(4)
     }
-    console.log(user)
-    console.log(cartCount);
+    // console.log(user)
+    // console.log(cartCount);
   }, [user]);
 
   const toggleOpen = () => {
@@ -49,7 +49,7 @@ export default function Navbar() {
         {},
         { withCredentials: true }
       );
-      console.log(res);
+      // console.log(res);
 
       if (res.status >= 200 && res.status <= 300) {
         dispatch(removeUser());

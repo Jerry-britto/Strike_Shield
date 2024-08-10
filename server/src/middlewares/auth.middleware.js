@@ -7,7 +7,7 @@ export const verifyJwt = async (req, res, next) => {
     const token =
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", ""); //header: Bearer <tokens>
-    console.log("token ", token);
+    // console.log("token ", token);
 
     if (!token) {
       throw new Error("Unauthorized token");

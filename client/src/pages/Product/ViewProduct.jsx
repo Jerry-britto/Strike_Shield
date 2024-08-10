@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import Review from "../../components/Card/Review.jsx";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import Loader from "../../components/Loader/Loader.jsx";
+import { useSelector } from "react-redux";
 
 export default function ViewProduct() {
   const [productDetails, setProductDetails] = useState();
@@ -11,6 +12,9 @@ export default function ViewProduct() {
   const { pid } = useParams();
   const [userRevew, setUserReview] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const user = useSelector((state) => state.user);
+  const navigate = useNavigate();
+  const [qty, setQty] = useState(1);
 
   const addReview = async (e) => {
     e.preventDefault();
@@ -64,6 +68,30 @@ export default function ViewProduct() {
     return () => clearTimeout(timer);
   }, []);
 
+  const addToCart = async (pid) => {
+    if (user && user.length === 0) {
+      navigate("/login");
+      return;
+    }
+    try {
+      console.log(qty);
+      console.log(pid);
+
+      const res = await Axios.post(
+        `http://localhost:8000/api/v1/cart/item/${pid}`,
+        { quantity:qty },
+        { withCredentials: true }
+      );
+      if (res.status === 200) {
+        navigate("/carts");
+      }
+    } catch (error) {
+      console.log(error);
+
+      toast.error("Could not add to cart", { position: "top-center" });
+    }
+  };
+
   return isLoading ? (
     <div className="min-h-screen flex items-center">
       <Loader />
@@ -93,6 +121,9 @@ export default function ViewProduct() {
                     <input
                       type="number"
                       min={1}
+                      value={qty}
+                      onChange={(e) => setQty(e.target.value)}
+                      id="quantity"
                       max={productDetails.stock}
                       className="ml-4 w-16 p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />{" "}
@@ -114,9 +145,12 @@ export default function ViewProduct() {
               </div>
               <div class="flex flex-col">
                 <span class="title-font font-medium text-2xl text-gray-900">
-                  {productDetails.price}
+                  ₹{productDetails.price}
                 </span>
-                <button className="w-full bg-orange-300 p-2 text-2xl hover:bg-orange-400 rounded-2xl text-white mt-2">
+                <button
+                  className="w-full bg-orange-300 p-2 text-2xl hover:bg-orange-400 rounded-2xl text-white mt-2"
+                  onClick={() => addToCart(productDetails._id)}
+                >
                   Add To Cart
                 </button>
                 <button className="w-full bg-orange-500 text-2xl p-2 hover:bg-orange-600 rounded-xl text-white mt-2">
