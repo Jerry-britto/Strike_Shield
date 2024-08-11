@@ -71,24 +71,30 @@ export default function ViewProduct() {
   const addToCart = async (pid) => {
     if (user && user.length === 0) {
       navigate("/login");
-      return;
-    }
-    try {
-      console.log(qty);
-      console.log(pid);
+    } else {
+      try {
+        console.log(qty);
+        console.log(pid);
 
-      const res = await Axios.post(
-        `http://localhost:8000/api/v1/cart/item/${pid}`,
-        { quantity:qty },
-        { withCredentials: true }
-      );
-      if (res.status === 200) {
-        navigate("/carts");
+        const res = await Axios.post(
+          `http://localhost:8000/api/v1/cart/item/${pid}`,
+          { quantity: qty },
+          { withCredentials: true }
+        );
+        if (res.status === 200) {
+          navigate("/carts");
+        }
+      } catch (error) {
+        console.log(error);
+
+        toast.error("Could not add to cart", { position: "top-center" });
       }
-    } catch (error) {
-      console.log(error);
+    }
+  };
 
-      toast.error("Could not add to cart", { position: "top-center" });
+  const buyNow = () => {
+    if (user && user.length === 0) {
+      navigate("/login");
     }
   };
 
@@ -153,7 +159,10 @@ export default function ViewProduct() {
                 >
                   Add To Cart
                 </button>
-                <button className="w-full bg-orange-500 text-2xl p-2 hover:bg-orange-600 rounded-xl text-white mt-2">
+                <button
+                  className="w-full bg-orange-500 text-2xl p-2 hover:bg-orange-600 rounded-xl text-white mt-2"
+                  onClick={buyNow}
+                >
                   Buy Now
                 </button>
               </div>

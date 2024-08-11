@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function CartItem({
@@ -8,9 +8,11 @@ export default function CartItem({
   coverImage = "",
   id = "",
   onDelete = function () {},
-}) {
+})
+{
+  const [isBlur,setIsBlur] = useState(false)
   return (
-    <div className="max-w-xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden flex my-8 p-4">
+    <div className={` ${isBlur && "blur-sm"} max-w-xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden flex my-8 p-4`}>
       <Link
         to={`/product/${id}`}
         className="flex-shrink-0 hover:border-2 hover:border-orange-300 hover:rounded-lg p-2 cursor-pointer"
@@ -29,7 +31,9 @@ export default function CartItem({
           </button>
           <button
             className="bg-red-500 text-white p-2 ml-2 rounded-md"
-            onClick={()=>onDelete(id)}
+            onClick={() => {
+              setIsBlur(true)
+              onDelete(id)}}
           >
             Remove
           </button>

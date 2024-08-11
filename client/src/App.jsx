@@ -28,9 +28,7 @@ const router = createBrowserRouter(
         <Route index element={<CartPage />} />
       </Route>
 
-      <Route path="/product/:pid" element={<Layout />}>
-        <Route index element={<ViewProduct />} />
-      </Route>
+      <Route path="/product/:pid" element={<ViewProduct/>}/>
 
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
@@ -42,7 +40,4 @@ const router = createBrowserRouter(
 
 export default function App() {
   return <RouterProvider router={router} />;
-  // return <>
-  // <CartPage/>
-  // </>
 }

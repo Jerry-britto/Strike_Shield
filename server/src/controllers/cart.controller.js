@@ -103,7 +103,7 @@ export async function addOrUpdateCart(req, res) {
     );
 
     if (addedProduct) {
-      if (!desc) addedProduct.quantity += quantity;
+      if (!desc) addedProduct.quantity += parseInt(quantity);
       else addedProduct.quantity -= quantity;
     } else {
       cart.items.push({

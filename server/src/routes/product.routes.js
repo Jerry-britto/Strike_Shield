@@ -4,6 +4,7 @@ import {
   addProduct,
   getAllProducts,
   getProductById,
+  searchProduct,
   setDefaultProduct,
 } from "../controllers/product.controller.js";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
@@ -29,5 +30,8 @@ router
   .route("/review/:productId")
   .post(verifyJwt, addReview)
   .get(getReviewsOfProduct);
+
+// search for product
+router.route("/search").get(searchProduct)
 
 export default router;

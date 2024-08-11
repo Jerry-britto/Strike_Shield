@@ -159,15 +159,45 @@ export async function getAllProducts(_, res) {
       .sort((a, b) => b.views - a.views)
       .splice(0, 4);
 
-    return res
-      .status(200)
-      .json({
-        message: "products data",
-        success: true,
-        higherViewProduct,
-        lowerViewProduct: products,
-      });
+    return res.status(200).json({
+      message: "products data",
+      success: true,
+      higherViewProduct,
+      lowerViewProduct: products,
+    });
   } catch (error) {
     return res.json({ message: error.message, success: false });
+  }
+}
+
+// search for product
+export async function searchProduct(req, res) {
+  try {
+    const { searchInput } = req.query;
+    if (!searchInput.trim()) {
+      return res
+        .status(406)
+        .json({ message: "Kindly enter a valid search input", success: false });
+    }
+    const product = await Product.findOne({
+      name: { $regex: new RegExp(searchInput, "i") },
+    });
+
+    if (!product) {
+      return res
+        .status(404)
+        .json({ message: "Product not found", success: false });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Product exists", productId: product._id, success: true });
+
+  } catch (error) {
+    console.error(error);
+
+    return res
+      .status(500)
+      .json({ message: "Search failed", success: false });
   }
 }

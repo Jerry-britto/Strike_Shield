@@ -2,7 +2,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Avatar, Badge, Divider, Drawer, Menu, MenuItem } from "@mui/material";
 import logo from "../../../assets/LOGO.png";
 import MenuIcon from "@mui/icons-material/Menu";
-import { useEffect, useState } from "react";
+import {useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -12,20 +12,13 @@ import { removeUser } from "../../../store/slice.js";
 
 export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const [searchInput, setSearchInput] = useState("");
 
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    console.log("logged in user in home page" + user?.length);
-    if (user.length > 0) {
-      setCartCount(4)
-    }
-    // console.log(user)
-    // console.log(cartCount);
-  }, [user]);
+  
 
   const toggleOpen = () => {
     setDrawerOpen((prev) => !prev);
@@ -84,6 +77,43 @@ export default function Navbar() {
     }
   };
 
+  const searchForInput = async (e) => {
+    e.preventDefault();
+    if (!searchInput.trim()) {
+      toast.warn("Kindly enter a valid product name", {
+        position: "top-center",
+        autoClose: 2000,
+      });
+    } else {
+      console.log(searchInput);
+      try {
+        const res = await Axios.get(
+          `http://localhost:8000/api/v1/product/search?searchInput=${searchInput}`,
+          { withCredentials: true }
+        );
+        if (res.status === 200) {
+          const id = res.data.productId || "";
+          if (id) {
+            navigate(`/product/${id}`);
+          } else {
+            throw Error("Product not found");
+          }
+          setSearchInput("");
+        }
+        else{
+          throw Error("Product not found")
+        }
+      } catch (error) {
+        console.log(error);
+        setSearchInput("")
+        toast.error("gloves does not exist", {
+          position: "top-center",
+          autoClose: 2000,
+        });
+      }
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-col lg:flex-row justify-around items-center bg-slate-950  p-3 w-full text-white shadow-2xl">
@@ -106,21 +136,27 @@ export default function Navbar() {
         </div>
 
         <div className="flex gap-5">
-          <div>
+          <form onSubmit={searchForInput}>
             <input
               type="text"
               name="search"
               id="search"
+              value={searchInput}
+              autoComplete="off"
+              onChange={(e) => setSearchInput(e.target.value)}
               className="py-2 px-1 text-black rounded-lg"
             />
-            <button className="border p-2 outline-none rounded-md relative right-[4rem] box-border bg-orange-600 text-black mx-0 font-semibold hover:text-white">
+            <button
+              className="border p-2 outline-none rounded-md relative right-[4rem] box-border bg-orange-600 text-black mx-0 font-semibold hover:text-white"
+            >
               Search
             </button>
-          </div>
+          </form>
+
           {user.length === 0 ? (
             <NavLink
               to={"/login"}
-              className="font-semibold text-lg border p-2 box-border rounded-xl cursor-pointer lg:block hidden bg-orange-500 text-black"
+              className="font-semibold text-lg border p-2 box-border rounded-lg  cursor-pointer lg:block hidden bg-orange-500 text-black hover:text-white"
             >
               Login
             </NavLink>
@@ -154,15 +190,11 @@ export default function Navbar() {
                 </MenuItem>
               </Menu>
               <NavLink to={"/carts"}>
-                {cartCount == 0 ? (
+               
                   <Badge color="primary">
                     <ShoppingCartIcon style={{ fontSize: "30px" }} />
                   </Badge>
-                ) : (
-                  <Badge badgeContent={`${cartCount}`} color="primary">
-                    <ShoppingCartIcon style={{ fontSize: "30px" }} />
-                  </Badge>
-                )}
+                
               </NavLink>
             </div>
           )}

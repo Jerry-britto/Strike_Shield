@@ -2,6 +2,7 @@ import {createSlice} from "@reduxjs/toolkit";
 
 const initialState = {
     user:[],
+    products:[]
 }
 
 export const ecommSlice = createSlice({
@@ -15,9 +16,12 @@ export const ecommSlice = createSlice({
         removeUser:function(state,_){
             state.user.pop();
         },
+        setProductsData:function(state,action){
+            state.products = action.payload
+        }
     }
 })
 
-export const {addUser,removeUser} = ecommSlice.actions;
+export const {addUser,removeUser,setProductsData} = ecommSlice.actions;
 
 export default ecommSlice.reducer;
