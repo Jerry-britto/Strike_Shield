@@ -3,10 +3,17 @@ import bcrypt from "bcryptjs";
 
 export async function registerUser(req, res) {
   try {
-    const { first_name, last_name, email, password, cpassword, address } =
-      req.body;
+    const {
+      first_name,
+      last_name,
+      email,
+      password,
+      cpassword,
+      address,
+      mobile,
+    } = req.body;
     if (
-      [first_name, last_name, email, password, cpassword, address].some(
+      [first_name, last_name, email, password, cpassword, address, mobile].some(
         (ele) => ele?.trim() === ""
       )
     ) {
@@ -39,6 +46,8 @@ export async function registerUser(req, res) {
       password: hashedPassword,
       isAdmin: req.body.isAdmin === true,
       address,
+      tokens: !req.body.isAdmin ? 20000 : 0,
+      mobile,
     });
 
     const savedUser = await User.findById(user._id).select(
@@ -129,7 +138,12 @@ export async function logoutUser(req, res) {
     return res
       .clearCookie("accessToken", options)
       .status(201)
-      .json({ message: `User ${req.user?.email} logged out`, success: true });
+      .json({
+        message: `${req.user?.isAdmin ? "Admin" : "User"} ${
+          req.user?.email
+        } logged out`,
+        success: true,
+      });
   } catch (error) {
     console.log("Logout fail due to " + error.message);
   }
@@ -137,10 +151,9 @@ export async function logoutUser(req, res) {
 
 export async function validUser(req, res) {
   try {
-
     return res.status(200).json({
       message: `Valid Logged in ${req.user?.isAdmin ? "Admin" : "User"}`,
-      user:req.user,
+      user: req.user,
     });
   } catch (error) {
     console.log("error occured while finding user", error.message);

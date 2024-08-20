@@ -36,6 +36,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    mobile:{
+      type:String,
+      required:true,
+      min:[10,"Number of digits in mobile number should be 10"]
+    },
+    tokens:Number // for performing payment
   },
   { timestamps: true }
 );
