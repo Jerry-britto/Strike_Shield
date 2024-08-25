@@ -16,6 +16,10 @@ const PaymentSchema = new Schema(
     paymentAmount: {
       type: Number,
     },
+    discount:{
+      type:Boolean,
+      default:false
+    },
     status:{
       type:String,
       enum:["SUCCESS","FAIL","PENDING"],

@@ -34,16 +34,20 @@ export async function placeOrder(req, res) {
     for (let i = 0; i < products.length; i++) {
       if (
         !mongoose.isValidObjectId(products[i].id) ||
-        Object.keys(products).length !== 2
+        Object.keys(products[i]).length !== 2
       )
         throw Error("Invalid Product");
 
       pr = await isValidProduct(products[i].id);
 
-      if (!pr || pr == null) {
+      if (!pr) {
         return res
           .status(400)
           .json({ message: "Invalid Product", success: false });
+      }
+
+      if(pr.stock<products[i].quantity){
+        return res.status(409).json({message:"Out of stock",success:false});
       }
 
       totalAmount += pr.price * products[i].quantity; // summing up amount
@@ -55,7 +59,6 @@ export async function placeOrder(req, res) {
       orderData = await OrderDetail.create({
         orderId: order._id,
         productId: pr._id,
-        price: pr.price,
         quantity: products[i].quantity,
       });
 
@@ -68,33 +71,26 @@ export async function placeOrder(req, res) {
       await pr.save(); // saving updated stock of product
     }
 
-    console.log("amount before discount ", totalAmount);
-
     // fill in other order details and save it
     order.customer = req.user?._id;
-    if (productCount > 10) order.totalCost = totalAmount - totalAmount * 0.1;
-    else order.totalCost = totalAmount;
 
-    console.log("amount post discount ", order.totalCost);
+    const payment = new Payment();
+    payment.paymentAmount = totalAmount;
+    if (productCount >= 10) payment.discount = true;
 
     const date = new Date();
     order.orderDate = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 
     await order.save(); // saving order
 
-    const isOrderExists = await Order.findById(order._id);
-
-    if (!isOrderExists) throw Error("Order was not saved");
-
-    await Payment.create({
-      orderId: order._id,
-      paymentAmount: isOrderExists.totalCost,
-      userId:req.user._id
-    });
+    payment.orderId = order._id;
+    payment.userId = req.user._id;
+    await payment.save();
 
     return res
       .status(200)
-      .json({ message: "Order created and payment is pending" });
+      .json({ message: "Order created and payment is pending",paymentId:payment._id });
+
   } catch (error) {
     return res.json({
       message: "could not process order",
@@ -112,26 +108,39 @@ export async function clearOrder(req, res) {
     if (orderId === "")
       return res.status(400).json({ message: "No order id received" });
 
-    const products = await OrderDetail.deleteMany({ orderId });
+    const order = await Order.findById(orderId);
 
-    if (!products)
+    if(!order){
+      throw Error("Order does not exist");
+    }
+
+    const orderDetails = await OrderDetail.find({ orderId });
+
+    console.log(orderDetails);
+    
+
+    if (!orderDetails)
       return res
         .status(404)
         .json({ message: "Products with order id not found" });
 
-    for (let i = 0; i < products.length; i++) {
-      if (!mongoose.isValidObjectId(products[i].productId))
+    for (let i = 0; i < orderDetails.length; i++) {
+      if (!mongoose.isValidObjectId(orderDetails[i].productId))
         throw Error("Invalid product id");
 
-      let product = await isValidProduct(products[i].productId);
-
+      let product = await isValidProduct(orderDetails[i].productId);
+      
+      
       if (!product) throw Error("Product does not exist");
+      console.log('product - ',product);
+      
 
-      product.stock += products[i].quantity;
+      product.stock += orderDetails[i].quantity;
 
       await product.save();
     }
 
+    await OrderDetail.deleteMany({orderId})
     await Payment.deleteOne({ orderId }); // deleting payment record
     await Order.findByIdAndDelete(orderId);
 
@@ -139,7 +148,7 @@ export async function clearOrder(req, res) {
       .status(200)
       .json({ message: "Order cleared succesfully", success: true });
   } catch (error) {
-    return res.json({
+    return res.status(500).json({
       message: "could not clear order",
       success: false,
       reason: error.message,
