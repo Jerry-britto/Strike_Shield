@@ -22,7 +22,7 @@ const PaymentSchema = new Schema(
     },
     status:{
       type:String,
-      enum:["SUCCESS","FAIL","PENDING"],
+      enum:["SUCCESS","PENDING"],
       default:"PENDING"
     }
   },

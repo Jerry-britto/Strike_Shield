@@ -12,6 +12,7 @@ import {
 } from "react-router-dom";
 import Admin from "./pages/Home/Admin.jsx";
 import NotFound from "./components/404/NotFound.jsx";
+import Order from "./pages/Order/Order.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -29,6 +30,7 @@ const router = createBrowserRouter(
       </Route>
 
       <Route path="/product/:pid" element={<ViewProduct/>}/>
+      <Route path="/orders" element={<Order/>}/>
 
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />

@@ -58,25 +58,66 @@ export default function CartPage() {
     }
   };
 
+  const buyBulk = () => {
+    let orders = [];
+    data.forEach((item) =>
+      orders.push({
+        id: item.product._id,
+        pname: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price,
+      })
+    );
+
+    navigate("/orders", {
+      state: {
+        orderDetail: orders
+      },
+    });
+    
+  };
+
   return loading ? (
     <Loader className="min-h-screen" />
   ) : data.length > 0 ? (
-    <div className="my-10 min-h-screen">
-      <h1 className="text-4xl font-bold text-center">Your Cart</h1>
-      <h2 className="text-3xl font-semibold text-center mt-2">{`Total Items : ${data.length}`}</h2>
-      {data.map((ele) => (
-        <CartItem
-          key={ele.product._id}
-          id={ele.product._id}
-          name={ele.product.name}
-          price={ele.product.price}
-          quantity={ele.quantity}
-          coverImage={ele.product.coverImage}
-          onDelete={deleteCartItem}
-        />
-      ))}
-      <div className="text-3xl  text-center font-semibold">
-        {`Total Amount: ₹${totalAmnt}`}
+    <div className="my-10 min-h-screen ">
+      <div className="flex flex-wrap justify-center gap-8">
+        <div>
+          {data.map((ele) => (
+            <CartItem
+              key={ele.product._id}
+              id={ele.product._id}
+              name={ele.product.name}
+              price={ele.product.price}
+              quantity={ele.quantity}
+              coverImage={ele.product.coverImage}
+              onDelete={deleteCartItem}
+            />
+          ))}
+        </div>
+        <div>
+          <div className="bg-white shadow-2xl rounded-xl p-8 w-full md:w-80">
+            <div className="mb-8">
+              <h2 className="text-3xl font-semibold text-gray-800 border-b-2 pb-4">
+                Cart Details
+              </h2>
+            </div>
+            <div className="flex justify-between text-gray-700 mb-6">
+              <span className="text-xl font-semibold">Total items:</span>
+              <span className="text-xl font-semibold">{data.length}</span>
+            </div>
+            <div className="flex justify-between text-gray-700">
+              <span className="text-xl font-semibold">Total Cost</span>
+              <span className="text-xl font-semibold">{totalAmnt}</span>
+            </div>
+            <button
+              onClick={buyBulk}
+              className="mt-8 text-2xl w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition duration-300"
+            >
+              Buy Now
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   ) : (
@@ -85,5 +126,3 @@ export default function CartPage() {
     </h1>
   );
 }
-
-

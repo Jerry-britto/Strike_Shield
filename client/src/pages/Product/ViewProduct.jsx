@@ -95,6 +95,17 @@ export default function ViewProduct() {
   const buyNow = () => {
     if (user && user.length === 0) {
       navigate("/login");
+    } else {
+      navigate("/orders", {
+        state: {
+          orderDetail: {
+            id: productDetails._id,
+            pname: productDetails.name,
+            quantity: parseInt(qty),
+            price: Number(productDetails.price),
+          },
+        },
+      });
     }
   };
 

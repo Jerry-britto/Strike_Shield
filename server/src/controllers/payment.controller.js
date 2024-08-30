@@ -81,6 +81,11 @@ export async function makePayment(req, res) {
     const admin = await User.findOne({ isAdmin: true });
 
     let originalTotalCost = payment.paymentAmount;
+
+    if (originalTotalCost < 500) {
+      originalTotalCost+=50; // delivery charges
+    }
+    
     let discountCost = 0;
 
     if (userTokens < originalTotalCost) {
@@ -99,6 +104,7 @@ export async function makePayment(req, res) {
     console.log("user tokens before deduction - ", req.user.tokens);
     console.log("admin tokens before deduction - ", admin.tokens);
 
+    // managing discount 
     if (discountCost === 0) {
       req.user.tokens -= originalTotalCost;
       admin.tokens += originalTotalCost;
