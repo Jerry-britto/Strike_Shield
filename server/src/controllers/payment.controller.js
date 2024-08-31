@@ -83,10 +83,10 @@ export async function makePayment(req, res) {
     let originalTotalCost = payment.paymentAmount;
 
     if (originalTotalCost < 500) {
-      originalTotalCost+=50; // delivery charges
+      originalTotalCost += 50; // delivery charges
+      payment.paymentAmount += 50; // updating it in db
+      payment.deliveryCharge = true;
     }
-    
-    let discountCost = 0;
 
     if (userTokens < originalTotalCost) {
       return res
@@ -94,39 +94,25 @@ export async function makePayment(req, res) {
         .json({ message: "Do not have enough tokens", success: false });
     }
 
-    console.log("total cost before discount - ", originalTotalCost);
-
-    if (payment.discount)
-      discountCost = originalTotalCost - originalTotalCost * 0.1;
-
-    console.log("total cost after discount - ", discountCost);
-
     console.log("user tokens before deduction - ", req.user.tokens);
     console.log("admin tokens before deduction - ", admin.tokens);
 
-    // managing discount 
-    if (discountCost === 0) {
-      req.user.tokens -= originalTotalCost;
-      admin.tokens += originalTotalCost;
-    } else {
-      req.user.tokens -= discountCost;
-      admin.tokens += discountCost;
-    }
+    // debit and credit
+    req.user.tokens -= originalTotalCost;
+    admin.tokens += originalTotalCost;
 
     console.log("user tokens after deduction - ", req.user.tokens);
     console.log("admin tokens after deduction - ", admin.tokens);
     payment.status = "SUCCESS";
 
-    if(discountCost !== 0){
-      payment.paymentAmount = discountCost;
-    }
-
     const receipt = {
       paymentId: payment._id,
+      orderId: payment.orderId,
       orderDetails,
       totalCost: originalTotalCost,
+      GST: "3%",
       discount: payment.discount,
-      finalAmount: discountCost !== 0 ? discountCost : originalTotalCost,
+      deliveryCharges: payment.deliveryCharge,
       paymentStatus: payment.status,
     };
 
@@ -139,7 +125,7 @@ export async function makePayment(req, res) {
       .status(200)
       .json({ message: "Payment successful", success: true, receipt });
   } catch (error) {
-    return res.json({
+    return res.status().json({
       message: "payment fail",
       reason: error.message,
       success: false,
@@ -168,35 +154,31 @@ export async function getPayment(req, res) {
         details: await generateReceipt(payment._id),
         totalCost: payment.paymentAmount,
         discount: payment.discount,
-        status:payment.status
+        status: payment.status,
       };
     });
 
     let paymentDetails = await Promise.all(receiptPromises);
 
-    return res
-      .status(200)
-      .json({
-        message: "Payments retrevied successfully",
-        success: true,
-        paymentDetails,
-      });
-
+    return res.status(200).json({
+      message: "Payments retrevied successfully",
+      success: true,
+      paymentDetails,
+    });
   } catch (error) {
     return res.status(500).json({ message: "Could not get your payments" });
   }
 }
 
 // get orders based on pending payments
-export async function getPendingPayments(req,res){
+export async function getPendingPayments(req, res) {
   try {
-
     const userId = req.user._id;
 
-    const pendingPayments = await Payment.find({status:"PENDING"})
+    const pendingPayments = await Payment.find({ status: "PENDING" });
 
-    if(!pendingPayments || pendingPayments.length === 0){
-      return res.status(404).json({message:"No Pending payments"})
+    if (!pendingPayments || pendingPayments.length === 0) {
+      return res.status(404).json({ message: "No Pending payments" });
     }
 
     const pendingOrderDetals = await Payment.aggregate([
@@ -230,8 +212,8 @@ export async function getPendingPayments(req,res){
           productDetails: {
             $push: {
               productid: "$productData._id",
-              productName:"$productData.name",
-              image:"$productData.coverImage",
+              productName: "$productData.name",
+              image: "$productData.coverImage",
               quantity: "$items.quantity",
               price: "$productData.price",
             },
@@ -239,20 +221,19 @@ export async function getPendingPayments(req,res){
         },
       },
       {
-        $project:{
-          _id:0,
-          productDetails:1
-        }
-      }
+        $project: {
+          _id: 0,
+          productDetails: 1,
+        },
+      },
     ]);
 
     console.log(pendingOrderDetals);
-    return res.json(pendingOrderDetals)
-
+    return res.json(pendingOrderDetals);
   } catch (error) {
     return res.status(500).json({
-      message:"Could not retrieve pending payments",
-      reason:error.message
-    })
+      message: "Could not retrieve pending payments",
+      reason: error.message,
+    });
   }
 }

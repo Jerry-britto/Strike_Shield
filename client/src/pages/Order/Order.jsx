@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import OrderCard from "../../components/Card/OrderCard";
 import { useLocation } from "react-router-dom";
+import ReceiptCard from "../../components/Card/ReceiptCard";
 
 export default function Order() {
   const location = useLocation();
@@ -28,11 +29,17 @@ export default function Order() {
 
     let finalCost = cost;
 
+    let gstCost = finalCost * 0.03
+    let discountedCost = 0;
+
+    // finalCost += finalCost * 0.03; // Adding 3% GST
     if (qty >= 10) {
       console.log('Discount applied');
-      finalCost -= finalCost * 0.1; // 10% discount
+      discountedCost = finalCost * 0.1; // 10% discount 
       setIsDiscount(true);
     } 
+
+    finalCost += gstCost - discountedCost;
 
     if (finalCost < 500) {
       console.log('Delivery charges applied');
@@ -40,11 +47,9 @@ export default function Order() {
       setIsDeliveryCost(true);
     } 
 
-    const finalAmount = finalCost + finalCost * 0.03; // Adding 3% GST
-
     // Update states
     setCostOfProduct(cost);
-    setTotalCost(finalAmount);
+    setTotalCost(finalCost);
   };
 
   useEffect(() => {
@@ -104,6 +109,8 @@ export default function Order() {
           </button>
         </div>
       </div>
+
+      {/* <ReceiptCard/> */}
     </div>
   );
 }

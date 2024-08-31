@@ -46,8 +46,10 @@ export async function placeOrder(req, res) {
           .json({ message: "Invalid Product", success: false });
       }
 
-      if(pr.stock<products[i].quantity){
-        return res.status(409).json({message:"Out of stock",success:false});
+      if (pr.stock < products[i].quantity) { // managing inventory
+        return res
+          .status(409)
+          .json({ message: "Out of stock", success: false });
       }
 
       totalAmount += pr.price * products[i].quantity; // summing up amount
@@ -73,23 +75,31 @@ export async function placeOrder(req, res) {
 
     // fill in other order details and save it
     order.customer = req.user?._id;
-
-    const payment = new Payment();
-    payment.paymentAmount = totalAmount;
-    if (productCount >= 10) payment.discount = true;
-
+    order.totalCost = totalAmount;
     const date = new Date();
     order.orderDate = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-
     await order.save(); // saving order
 
+    const payment = new Payment();
+    let discountedCost = 0,
+      gstCost = totalAmount * 0.03; // applying gst
+
+    if (productCount >= 10) {
+      // applying discount
+      discountedCost = totalAmount * 0.1;
+      payment.discount = true;
+    }
+
+
+    payment.paymentAmount = totalAmount + gstCost - discountedCost;
     payment.orderId = order._id;
     payment.userId = req.user._id;
     await payment.save();
 
-    return res
-      .status(200)
-      .json({ message: "Order created and payment is pending",paymentId:payment._id });
+    return res.status(200).json({
+      message: "Order created and payment is pending",
+      paymentId: payment._id,
+    });
 
   } catch (error) {
     return res.json({
@@ -110,14 +120,13 @@ export async function clearOrder(req, res) {
 
     const order = await Order.findById(orderId);
 
-    if(!order){
+    if (!order) {
       throw Error("Order does not exist");
     }
 
     const orderDetails = await OrderDetail.find({ orderId });
 
     console.log(orderDetails);
-    
 
     if (!orderDetails)
       return res
@@ -129,18 +138,16 @@ export async function clearOrder(req, res) {
         throw Error("Invalid product id");
 
       let product = await isValidProduct(orderDetails[i].productId);
-      
-      
+
       if (!product) throw Error("Product does not exist");
-      console.log('product - ',product);
-      
+      console.log("product - ", product);
 
       product.stock += orderDetails[i].quantity;
 
       await product.save();
     }
 
-    await OrderDetail.deleteMany({orderId})
+    await OrderDetail.deleteMany({ orderId });
     await Payment.deleteOne({ orderId }); // deleting payment record
     await Order.findByIdAndDelete(orderId);
 

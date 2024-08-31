@@ -13,6 +13,7 @@ import {
 import Admin from "./pages/Home/Admin.jsx";
 import NotFound from "./components/404/NotFound.jsx";
 import Order from "./pages/Order/Order.jsx";
+import InvoicePage from "./pages/Order/InvoicePage.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -28,6 +29,8 @@ const router = createBrowserRouter(
       <Route path="/carts" element={<Layout />}>
         <Route index element={<CartPage />} />
       </Route>
+
+        <Route path="/receipt" element={<InvoicePage />} />
 
       <Route path="/product/:pid" element={<ViewProduct/>}/>
       <Route path="/orders" element={<Order/>}/>

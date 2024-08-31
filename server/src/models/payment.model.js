@@ -20,6 +20,10 @@ const PaymentSchema = new Schema(
       type:Boolean,
       default:false
     },
+    deliveryCharge:{
+      type:Boolean,
+      default:false
+    },
     status:{
       type:String,
       enum:["SUCCESS","PENDING"],

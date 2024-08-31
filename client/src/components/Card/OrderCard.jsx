@@ -40,10 +40,10 @@ export default function OrderCard({ items }) {
                 className="border-b border-gray-200 hover:bg-gray-100 transition duration-300"
               >
                 <td className="py-5 px-10 font-semibold">
-                  {items.name || "Product name"}
+                  {items.pname || "Product name"}
                 </td>
                 <td className="py-5 px-10 font-semibold">
-                  ${items.price || 0}
+                ₹{items.price || 0}
                 </td>
                 <td className="py-5 px-10 font-semibold">
                   {items.quantity || 0}
