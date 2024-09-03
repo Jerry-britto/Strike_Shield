@@ -2,13 +2,14 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Avatar, Badge, Divider, Drawer, Menu, MenuItem } from "@mui/material";
 import logo from "../../../assets/LOGO.png";
 import MenuIcon from "@mui/icons-material/Menu";
-import {useState } from "react";
+import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { removeUser } from "../../../store/slice.js";
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 
 export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -17,8 +18,6 @@ export default function Navbar() {
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  
 
   const toggleOpen = () => {
     setDrawerOpen((prev) => !prev);
@@ -99,13 +98,12 @@ export default function Navbar() {
             throw Error("Product not found");
           }
           setSearchInput("");
-        }
-        else{
-          throw Error("Product not found")
+        } else {
+          throw Error("Product not found");
         }
       } catch (error) {
         console.log(error);
-        setSearchInput("")
+        setSearchInput("");
         toast.error("gloves does not exist", {
           position: "top-center",
           autoClose: 2000,
@@ -146,9 +144,7 @@ export default function Navbar() {
               onChange={(e) => setSearchInput(e.target.value)}
               className="py-2 px-1 text-black rounded-lg"
             />
-            <button
-              className="border p-2 outline-none rounded-md relative right-[4rem] box-border bg-orange-600 text-black mx-0 font-semibold hover:text-white"
-            >
+            <button className="border p-2 outline-none rounded-md relative right-[4rem] box-border bg-orange-600 text-black mx-0 font-semibold hover:text-white">
               Search
             </button>
           </form>
@@ -183,6 +179,12 @@ export default function Navbar() {
                 }}
               >
                 <MenuItem onClick={handleClose}>
+                  <div onClick={() => navigate("/paymenthistory")}>
+                    <CurrencyRupeeIcon />
+                    View Purchases
+                  </div>
+                </MenuItem>
+                <MenuItem onClick={handleClose}>
                   <div onClick={logout}>
                     <LogoutIcon />
                     Logout
@@ -190,11 +192,9 @@ export default function Navbar() {
                 </MenuItem>
               </Menu>
               <NavLink to={"/carts"}>
-               
-                  <Badge color="primary">
-                    <ShoppingCartIcon style={{ fontSize: "30px" }} />
-                  </Badge>
-                
+                <Badge color="primary">
+                  <ShoppingCartIcon style={{ fontSize: "30px" }} />
+                </Badge>
               </NavLink>
             </div>
           )}

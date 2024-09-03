@@ -14,6 +14,7 @@ import Admin from "./pages/Home/Admin.jsx";
 import NotFound from "./components/404/NotFound.jsx";
 import Order from "./pages/Order/Order.jsx";
 import InvoicePage from "./pages/Order/InvoicePage.jsx";
+import PaymentHistory from "./pages/Order/PaymentHistory.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -23,22 +24,26 @@ const router = createBrowserRouter(
       </Route>
 
       <Route path="/admin" element={<Layout />}>
-        <Route index element={<Admin/>} />
+        <Route index element={<Admin />} />
       </Route>
 
       <Route path="/carts" element={<Layout />}>
         <Route index element={<CartPage />} />
       </Route>
 
-        <Route path="/receipt" element={<InvoicePage />} />
+      <Route path="/receipt" element={<InvoicePage />} />
 
-      <Route path="/product/:pid" element={<ViewProduct/>}/>
-      <Route path="/orders" element={<Order/>}/>
+      <Route path="/product/:pid" element={<ViewProduct />} />
+
+      
+        <Route path="/paymenthistory" index element={<PaymentHistory />} />
+
+      <Route path="/orders" element={<Order />} />
 
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      <Route path="*" element={<NotFound/>}/>
+      <Route path="*" element={<NotFound />} />
     </>
   )
 );
