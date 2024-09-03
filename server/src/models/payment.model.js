@@ -24,6 +24,7 @@ const PaymentSchema = new Schema(
       type:Boolean,
       default:false
     },
+    receipt:Object,
     status:{
       type:String,
       enum:["SUCCESS","PENDING"],

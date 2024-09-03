@@ -88,9 +88,10 @@ export async function makePayment(req, res) {
       payment.deliveryCharge = true;
     }
 
-    if (userTokens < originalTotalCost) {
+    if (
+      userTokens < originalTotalCost) {
       return res
-        .status(400)
+        .status(406)
         .json({ message: "Do not have enough tokens", success: false });
     }
 
@@ -115,6 +116,8 @@ export async function makePayment(req, res) {
       deliveryCharges: payment.deliveryCharge,
       paymentStatus: payment.status,
     };
+
+    payment.receipt = receipt;
 
     // saving updated details
     await req.user.save();
@@ -145,25 +148,11 @@ export async function getPayment(req, res) {
         .status(200)
         .json({ message: "No payments made", success: true });
     }
-
-    console.log(payments);
-
-    const receiptPromises = payments.map(async (payment) => {
-      return {
-        paymentId: payment._id,
-        details: await generateReceipt(payment._id),
-        totalCost: payment.paymentAmount,
-        discount: payment.discount,
-        status: payment.status,
-      };
-    });
-
-    let paymentDetails = await Promise.all(receiptPromises);
-
+    
     return res.status(200).json({
       message: "Payments retrevied successfully",
       success: true,
-      paymentDetails,
+      payments,
     });
   } catch (error) {
     return res.status(500).json({ message: "Could not get your payments" });

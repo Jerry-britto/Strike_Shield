@@ -32,10 +32,9 @@ export async function placeOrder(req, res) {
 
     // process all the products and check whether it exists or not and calculate total amount
     for (let i = 0; i < products.length; i++) {
-      if (
-        !mongoose.isValidObjectId(products[i].id) ||
-        Object.keys(products[i]).length !== 2
-      )
+      console.log(products[i]);
+
+      if (!mongoose.isValidObjectId(products[i].id))
         throw Error("Invalid Product");
 
       pr = await isValidProduct(products[i].id);
@@ -46,10 +45,11 @@ export async function placeOrder(req, res) {
           .json({ message: "Invalid Product", success: false });
       }
 
-      if (pr.stock < products[i].quantity) { // managing inventory
+      if (pr.stock < products[i].quantity) {
+        // managing inventory
         return res
           .status(409)
-          .json({ message: "Out of stock", success: false });
+          .json({ message: "Out of stock", pname: pr.name, success: false });
       }
 
       totalAmount += pr.price * products[i].quantity; // summing up amount
@@ -90,7 +90,6 @@ export async function placeOrder(req, res) {
       payment.discount = true;
     }
 
-
     payment.paymentAmount = totalAmount + gstCost - discountedCost;
     payment.orderId = order._id;
     payment.userId = req.user._id;
@@ -99,10 +98,12 @@ export async function placeOrder(req, res) {
     return res.status(200).json({
       message: "Order created and payment is pending",
       paymentId: payment._id,
+      orderId: payment.orderId,
     });
-
   } catch (error) {
-    return res.json({
+    console.log(error);
+
+    return res.status(500).json({
       message: "could not process order",
       reason: error.message,
       success: false,
