@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import logo from "../../assets/shopping.png";
 import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -6,6 +6,8 @@ import { ToastContainer, toast } from "react-toastify";
 import Axios from "axios";
 import { addUser } from "../../store/slice.js";
 import { useDispatch, useSelector } from "react-redux";
+import Checkbox from '@mui/material/Checkbox';
+
 
 export default function Login() {
   const {
@@ -17,13 +19,15 @@ export default function Login() {
   const history = useNavigate();
   const dispath = useDispatch();
   const user = useSelector((state) => state.user);
+  const [showPassword,setShowPassword] = useState(false);
 
-  useEffect(()=>{
-    if(user && user.length >0 ){
-      history("/")
+  useEffect(()=>console.log(showPassword),[showPassword])
+
+  useEffect(() => {
+    if (user && user.length > 0) {
+      history("/");
     }
-  })
-
+  });
 
   const login = async (data) => {
     console.log(data);
@@ -31,7 +35,7 @@ export default function Login() {
       const res = await Axios.post(
         "http://localhost:8000/api/v1/user/login",
         data,
-        {withCredentials:true}
+        { withCredentials: true }
       );
       console.log("response " + res);
       if (res.status === 200) {
@@ -75,16 +79,21 @@ export default function Login() {
               </span>
             )}
             <input
-              type="password"
+              type={`${!showPassword?"password":"text"}`}
               className="p-2 rounded-lg w-full"
               placeholder="Enter Password"
               {...register("password", { required: true })}
             />
+           
             {errors.password && (
               <span className="text-red-500 text-sm my-1">
                 Password is required
               </span>
             )}
+            <span>
+            <Checkbox onChange={(e)=>setShowPassword(e.target.checked)} value={showPassword}/>
+            Show Password
+            </span>
 
             <button className="bg-orange-600 text-white font-bold p-2 rounded-md w-full my-4 text-2xl">
               Login

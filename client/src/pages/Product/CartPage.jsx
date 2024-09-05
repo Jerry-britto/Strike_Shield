@@ -39,7 +39,7 @@ export default function CartPage() {
   }, []);
 
   useEffect(() => {
-    console.log(data);
+    console.log("cart data ",data);
   }, [data]);
 
   const deleteCartItem = async (_id) => {

@@ -23,20 +23,19 @@ const router = createBrowserRouter(
         <Route index element={<Home />} />
       </Route>
 
-      <Route path="/admin" element={<Layout />}>
-        <Route index element={<Admin />} />
-      </Route>
+      <Route path="/admin" element={<Admin />} />
 
       <Route path="/carts" element={<Layout />}>
         <Route index element={<CartPage />} />
       </Route>
 
-      <Route path="/receipt" element={<InvoicePage />} />
+      <Route element={<Layout />}>
+        <Route path="/receipt" element={<InvoicePage />} />
+      </Route>
 
       <Route path="/product/:pid" element={<ViewProduct />} />
 
-      
-        <Route path="/paymenthistory" index element={<PaymentHistory />} />
+      <Route path="/paymenthistory" index element={<PaymentHistory />} />
 
       <Route path="/orders" element={<Order />} />
 

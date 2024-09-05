@@ -1,3 +1,4 @@
+import { OrderDetail } from "../models/orderDetails.model.js";
 import { Product } from "../models/product.model.js";
 import products from "../utils/data.js";
 
@@ -256,7 +257,6 @@ export async function removeProduct(req, res) {
       deletedProduct,
       success: true,
     });
-    
   } catch (error) {
     console.log(error);
     return res.status(500).json({
@@ -264,5 +264,61 @@ export async function removeProduct(req, res) {
       reason: error.message,
       success: false,
     });
+  }
+}
+
+// get product data with sold quantity
+export async function getProductDataAnalytic(_, res) {
+  console.log("processing");
+
+  const pipeline = [
+    {
+      $lookup: {
+        from: "orderdetails",
+        localField: "_id", 
+        foreignField: "productId", 
+        as: "orderDetails", 
+      },
+    },
+    {
+      $unwind: {
+        path: "$orderDetails",
+        preserveNullAndEmptyArrays: true, // Include products with no orders
+      },
+    },
+    {
+      $group: {
+        _id: "$_id", // Product ID
+        name: { $first: "$name" }, 
+        price: { $first: "$price" }, 
+        stock: { $first: "$stock" }, 
+        totalQuantitySold: { $sum: "$orderDetails.quantity" }, 
+      },
+    },
+    {
+      $project: {
+        _id: 1, 
+        name: 1, 
+        price: 1, 
+        stock: 1, 
+        totalQuantitySold: {
+          $ifNull: ["$totalQuantitySold", 0], // If no sales, show 0
+        },
+      },
+    },
+    {
+      $sort: { totalQuantitySold: -1 }, // Sort by quantity sold (optional)
+    },
+  ];
+
+  try {
+    // Run the aggregation pipeline
+    const results = await Product.aggregate(pipeline);
+    return res.json({ results });
+  } catch (error) {
+    console.error("Error during aggregation:", error);
+    return res
+      .status(500)
+      .json({ message: "Aggregation failed", error: error.message });
   }
 }
