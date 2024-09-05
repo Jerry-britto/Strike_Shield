@@ -128,6 +128,8 @@ export async function makePayment(req, res) {
       .status(200)
       .json({ message: "Payment successful", success: true, receipt });
   } catch (error) {
+    console.log(error);
+    
     return res.status().json({
       message: "payment fail",
       reason: error.message,

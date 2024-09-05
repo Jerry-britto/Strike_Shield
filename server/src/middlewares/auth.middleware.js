@@ -32,3 +32,10 @@ export const verifyJwt = async (req, res, next) => {
     return res.status(401).json({ message: error.message });
   }
 };
+
+export const verifyAdmin = (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return res.status(401).json({ message: "Logged in user is not an admin" });
+  }
+  next();
+};

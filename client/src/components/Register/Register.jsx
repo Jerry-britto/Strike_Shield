@@ -7,7 +7,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 import Axios from "axios";
 import { useSelector } from "react-redux";
 
-
 export default function Register() {
   const {
     register,
@@ -22,23 +21,24 @@ export default function Register() {
     address: "",
     password: "",
     cpassword: "",
+    mobile:""
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-  const user = useSelector(state=>state.user);
-  const redirect = useNavigate()
+  const user = useSelector((state) => state.user);
+  const redirect = useNavigate();
 
-  useEffect(()=>{
-    if(user && user.length >0){
-      redirect("/")
+  useEffect(() => {
+    if (user && user.length > 0) {
+      redirect("/");
     }
-  })
+  });
 
   const onSubmit = async (data) => {
     setIsLoading(true);
     setIsButtonDisabled(true);
-    const {password,cpassword} = data;
+    const { password, cpassword } = data;
     if (password !== cpassword) {
       console.log("dfd");
       toast.error("Your passwords are not matching", {
@@ -66,7 +66,7 @@ export default function Register() {
       }
       console.log("data sent after registration " + data);
       console.log("values after submitting", values);
-      
+
       setIsLoading(false);
       setIsButtonDisabled(false);
     } catch (error) {
@@ -166,6 +166,19 @@ export default function Register() {
               variant="outlined"
             />
             {errors.address && (
+              <span className="text-red-600">{errors.address.message}</span>
+            )}
+          </div>
+          <div className="mt-4">
+            <TextField
+              type="text"
+              {...register("mobile", { required: "Mobile number is required" })}
+              label="Mobile"
+              helperText="Enter Mobile Number"
+              className="w-full"
+              variant="outlined"
+            />
+            {errors.mobile && (
               <span className="text-red-600">{errors.address.message}</span>
             )}
           </div>

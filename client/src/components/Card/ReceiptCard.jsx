@@ -9,7 +9,7 @@ export default function ReceiptCard({
 }) {
   return (
     <div className="max-w-lg mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+      <div className="bg-gradient-to-r from-red-600 to-orange-400 text-white p-6">
         <h2 className="text-2xl font-bold">Payment Receipt</h2>
         <p className="text-lg mt-2">
           Reference Number: {paymentId || "djfkdljfldjf"}
@@ -68,8 +68,8 @@ export default function ReceiptCard({
         </div>
       </div>
 
-      <div className="bg-gray-100 p-4 text-center">
-        <p className="text-sm text-gray-600">Thank you for your purchase!</p>
+      <div className="bg-red-100  p-4 text-center">
+        <p className="text-md font-bold text-green-900">Thank you for your purchase!</p>
       </div>
     </div>
   );

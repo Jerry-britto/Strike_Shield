@@ -33,4 +33,7 @@ app.use("/api/v1/cart",cartRouter)
 import orderRouter from "./routes/order.routes.js"
 app.use("/api/v1/orders",orderRouter)
 
+import adminRouter from "./routes/admin.routes.js";
+app.use("/api/v1/admin",adminRouter)
+
 export default app

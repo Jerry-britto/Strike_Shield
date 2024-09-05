@@ -3,6 +3,7 @@ import ReceiptCard from "../../components/Card/ReceiptCard";
 import { useLocation, useNavigate } from "react-router-dom";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import './Invoice.css';
 
 export default function InvoicePage() {
   const location = useLocation()
@@ -38,20 +39,16 @@ export default function InvoicePage() {
   };
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col items-center p-12">
-      <div className="w-full max-w-3xl bg-white rounded-lg shadow-lg p-6 mb-8">
+        
+      <div className="w-full max-w-3xl bg-white rounded-lg shadow-lg p-6 mb-8" ref={pdfRef}>
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-5xl font-extrabold text-blue-800">
-            Company Name
+          <h1 className="text-5xl font-extrabold text-red-800 protest-guerrilla-regular">
+            Athletic Hub
           </h1>
-          <button
-            onClick={handleDownloadPDF}
-            className="bg-orange-600 text-white font-semibold text-lg px-6 py-2 rounded-lg hover:bg-orange-700 transition duration-300"
-          >
-            Download PDF
-          </button>
+         
         </div>
         <hr className="mb-6" />
-        <div ref={pdfRef}>
+        <div >
           <ReceiptCard
           paymentId={paymentReceiptData.paymentId}
           discountApplied={paymentReceiptData.discount}
@@ -61,6 +58,12 @@ export default function InvoicePage() {
           />
         </div>
       </div>
+      <button
+            onClick={handleDownloadPDF}
+            className="bg-orange-600 text-white font-semibold text-lg px-6 py-2 rounded-lg hover:bg-orange-700 transition duration-300"
+          >
+            Download PDF
+          </button>
     </div>
   );
 }
