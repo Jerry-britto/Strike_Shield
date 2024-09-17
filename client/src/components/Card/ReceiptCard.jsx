@@ -40,7 +40,7 @@ export default function ReceiptCard({
         </table>
 
         {discountApplied ? (
-          <div className="flex justify-between text-gray-700 mb-3">
+          <div className="flex justify-between text-gray-700 my-3">
             <span className="text-lg">Discount Applied:</span>
             <span className="text-lg">10%</span>
           </div>

@@ -158,6 +158,7 @@ export default function ViewProduct() {
                       </svg>
                     </span>
                   </div>
+                  {productDetails?.stock === 0?<span className="ml-2 text-red-500">Out of stock</span>:""}
                 </div>
               </div>
               <div class="flex flex-col">

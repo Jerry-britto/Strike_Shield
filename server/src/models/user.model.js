@@ -41,7 +41,10 @@ const userSchema = new mongoose.Schema(
       required:true,
       min:[10,"Number of digits in mobile number should be 10"]
     },
-    tokens:Number // for performing payment
+    tokens:Number, // for performing payment
+    purchaseStamp:{
+      type:Date,
+    }
   },
   { timestamps: true }
 );
@@ -72,9 +75,9 @@ userSchema.methods.generateToken = async function () {
       _id: this._id,
     },
     process.env.ACCESS_TOKEN,
-    {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
-    }
+    // {
+    //   expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+    // }
   );
   return token;
 };

@@ -2,7 +2,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Avatar, Badge, Divider, Drawer, Menu, MenuItem } from "@mui/material";
 import logo from "../../../assets/LOGO.png";
 import MenuIcon from "@mui/icons-material/Menu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -32,6 +32,10 @@ export default function Navbar() {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  useEffect(()=>{
+    console.log("logged in user - ",user);  
+  },[])
 
   const logout = async () => {
     console.log("logout");
@@ -158,6 +162,10 @@ export default function Navbar() {
             </NavLink>
           ) : (
             <div className=" font-medium mt-2 cursor-pointer hidden lg:flex lg:gap-10">
+              <span className="cursor-default mt-2 text-xl">
+                <CurrencyRupeeIcon/>
+              {user[0].tokens.toFixed(2)}
+              </span>
               <Avatar
                 style={{ backgroundColor: "blue", color: "white" }}
                 id="basic-button"

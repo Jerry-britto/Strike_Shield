@@ -5,7 +5,7 @@ import Axios from "axios";
 
 export default function DashBoardPage() {
   const [pData, setPData] = useState([2400, 1398, 9800, 390]);
-  const [oData, setOData] = useState([5,55,6,66]);
+  const [oData, setOData] = useState([5, 55, 6, 66]);
   const [topItemsSold, setTopItemssold] = useState([{}, {}, {}]);
   const xLabels = ["June", "July", "August", "September"];
 
@@ -52,7 +52,7 @@ export default function DashBoardPage() {
         className="w-full flex justify-center flex-wrap  gap-10 "
       >
         <AnalyticCard
-          title={"Revenue"}
+          title={"Total Revenue"}
           content={`₹ ${data?.totalSales || 5}`}
         />
         <AnalyticCard
@@ -80,7 +80,14 @@ export default function DashBoardPage() {
           <BarChart
             width={500}
             height={300}
-            series={[{ data: oData, label: "Total orders", id: "pvId",color:"green" }]}
+            series={[
+              {
+                data: oData,
+                label: "Total orders",
+                id: "pvId",
+                color: "green",
+              },
+            ]}
             xAxis={[{ data: xLabels, scaleType: "band" }]}
           />
         </div>
@@ -133,5 +140,3 @@ export default function DashBoardPage() {
     </div>
   );
 }
-
-

@@ -9,17 +9,21 @@ export default function PaymentHistory({}) {
   const navigate = useNavigate();
 
   const getPayments = async () => {
+    console.log("user id -",user[0]._id);
+    
     try {
       const res = await Axios.get(
-        "http://localhost:8000/api/v1/orders/payment",
-        { withCredentials: true }
+        "http://localhost:8000/api/v1/orders/payment/",
+        { withCredentials:true}
       );
+      console.log(res);
+      
       if (
         res.status === 200 &&
         res.data.message === "Payments retrevied successfully"
       ) {
         console.log("payments - ", res.data.payments);
-
+        
         setPayments(res.data.payments);
       }
     } catch (error) {
@@ -32,6 +36,8 @@ export default function PaymentHistory({}) {
       // for logged out users
       navigate("/");
     } else {
+      console.log("getting payments");
+      
       getPayments();
     }
   }, []);

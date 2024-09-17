@@ -90,10 +90,13 @@ export default function Login() {
                 Password is required
               </span>
             )}
+              <label htmlFor="passFor">
             <span>
-            <Checkbox onChange={(e)=>setShowPassword(e.target.checked)} value={showPassword}/>
+
+            <Checkbox id="passFor" onChange={(e)=>setShowPassword(e.target.checked)} value={showPassword}/>
             Show Password
             </span>
+              </label>
 
             <button className="bg-orange-600 text-white font-bold p-2 rounded-md w-full my-4 text-2xl">
               Login

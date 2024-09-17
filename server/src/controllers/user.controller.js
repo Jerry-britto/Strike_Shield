@@ -46,7 +46,7 @@ export async function registerUser(req, res) {
       password: hashedPassword,
       isAdmin: req.body.isAdmin === true,
       address,
-      tokens: !req.body.isAdmin ? 20000 : 0,
+      tokens: !req.body.isAdmin ? 10000 : 0,
       mobile,
     });
 
@@ -157,5 +157,84 @@ export async function validUser(req, res) {
     });
   } catch (error) {
     console.log("error occured while finding user", error.message);
+  }
+}
+
+export async function getUsers(_, res) {
+  try {
+    const users = await User.find({ isAdmin: false })
+      .select("-password -address -isAdmin -mobile -carts -updatedAt")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).send(users);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "could not retrieve users",
+      reason: error.message,
+      success: false,
+    });
+  }
+}
+
+export async function getTokens(req, res) {
+  try {
+    const { email = "", password = "" } = req.body;
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      console.log("User does not exist");
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.purchaseStamp) {
+      const currentTime = new Date();
+      if (currentTime < user.purchaseStamp) {
+        console.log("not eligible for tokens");
+        return res
+          .status(403)
+          .json({ message: "Token grant limit not reached" });
+      }
+    }
+
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Kindly provide your credentials",
+        success: false,
+      }); 
+    }
+
+    // Grant tokens logic here
+    if (email != user.email) {
+      return res.status(400).json({
+        message: "Incorrect Email",
+        success: false,
+      });
+    }
+
+    const checkPassword = await user.isPasswordCorrect(password);
+    if (!checkPassword) {
+      return res.status(400).json({
+        message: "Incorrect Password",
+        success: false,
+      });
+    }
+
+    console.log("Granting tokens");
+
+    user.tokens += 5000;
+    const serverTime = new Date();
+
+    serverTime.setHours(serverTime.getHours() + 120);
+    user.purchaseStamp = serverTime;
+
+    await user.save();
+
+    return res.status(200).json({ message: "Tokens granted" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
   }
 }

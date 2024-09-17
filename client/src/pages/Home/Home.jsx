@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import Axios from "axios";
 import { setProductsData } from "../../store/slice.js";
 
-function Home() {
+export default function Home() {
   const user = useSelector((state) => state.user);
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ function Home() {
     }
   });
 
-  return (
+  return  (
     <div className="w-full min-h-screen bg-slate-200">
       <Banner />
       <Slide higherViewProducts={products.higherViewProduct} />
@@ -46,5 +46,3 @@ function Home() {
     </div>
   );
 }
-
-export default Home;

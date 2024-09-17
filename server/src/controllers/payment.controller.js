@@ -88,11 +88,20 @@ export async function makePayment(req, res) {
       payment.deliveryCharge = true;
     }
 
-    if (
-      userTokens < originalTotalCost) {
-      return res
-        .status(406)
-        .json({ message: "Do not have enough tokens", success: false });
+    if (userTokens < originalTotalCost) {
+      const cuurDate = new Date();
+      const sysDate = req.user.purchaseStamp;
+      let validUserDialog = true;
+      if (sysDate === "" || sysDate === undefined) {
+        validUserDialog = true;
+      } else if (cuurDate < sysDate) {
+        validUserDialog = false;
+      }
+      return res.status(406).json({
+        message: "Do not have enough tokens",
+        validUserDialog,
+        success: false,
+      });
     }
 
     console.log("user tokens before deduction - ", req.user.tokens);
@@ -129,7 +138,7 @@ export async function makePayment(req, res) {
       .json({ message: "Payment successful", success: true, receipt });
   } catch (error) {
     console.log(error);
-    
+
     return res.status().json({
       message: "payment fail",
       reason: error.message,
@@ -142,14 +151,18 @@ export async function makePayment(req, res) {
 export async function getPayment(req, res) {
   try {
     const userId = req.user._id;
-
+    console.log(userId);
+    
     const payments = await Payment.find({ userId });
 
     if (!payments || payments.length === 0) {
+      console.log('no payments');
+      
       return res
         .status(200)
         .json({ message: "No payments made", success: true });
     }
+    console.log("has payments");
     
     return res.status(200).json({
       message: "Payments retrevied successfully",

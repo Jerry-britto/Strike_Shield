@@ -25,7 +25,7 @@ export default function AnalyticCard({ title, content }) {
       </div>
 
       {/* Content */}
-      <div className="relative p-6 rounded-lg border-2 border-gray-100">
+      <div className={`relative p-6 rounded-lg border-2 border-gray-100`}>
         <h2 className="text-lg font-semibold text-white tracking-wide">
           {title}
         </h2>

@@ -15,6 +15,7 @@ import NotFound from "./components/404/NotFound.jsx";
 import Order from "./pages/Order/Order.jsx";
 import InvoicePage from "./pages/Order/InvoicePage.jsx";
 import PaymentHistory from "./pages/Order/PaymentHistory.jsx";
+import TopLayout from "./Outlet/TopLayout.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -25,11 +26,11 @@ const router = createBrowserRouter(
 
       <Route path="/admin" element={<Admin />} />
 
-      <Route path="/carts" element={<Layout />}>
+      <Route path="/carts" element={<TopLayout />}>
         <Route index element={<CartPage />} />
       </Route>
 
-      <Route element={<Layout />}>
+      <Route element={<TopLayout />}>
         <Route path="/receipt" element={<InvoicePage />} />
       </Route>
 
@@ -37,7 +38,9 @@ const router = createBrowserRouter(
 
       <Route path="/paymenthistory" index element={<PaymentHistory />} />
 
+      <Route element={<TopLayout/>}>
       <Route path="/orders" element={<Order />} />
+      </Route>
 
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
