@@ -16,12 +16,23 @@ import Order from "./pages/Order/Order.jsx";
 import InvoicePage from "./pages/Order/InvoicePage.jsx";
 import PaymentHistory from "./pages/Order/PaymentHistory.jsx";
 import TopLayout from "./Outlet/TopLayout.jsx";
+import Contact from "./pages/Home/Contact.jsx";
+import About from "./pages/Home/About.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
+
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
+      </Route> 
+
+      <Route path="/contact" element={<Layout />}>
+        <Route index element={<Contact />} />
+      </Route> 
+
+      <Route path="/about" element={<Layout />}>
+        <Route index element={<About   />} />
       </Route>
 
       <Route path="/admin" element={<Admin />} />

@@ -32,6 +32,7 @@ export default function Order() {
   const descriptionElementRef = React.useRef(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [duration,setDuration] = useState(0);
 
   useEffect(() => {
     if (open) {
@@ -162,6 +163,7 @@ export default function Order() {
             setShowDialog(true);
 
             setIsValid(paymentError.response?.data.validUserDialog); // Indicates insufficient tokens
+            setDuration(paymentError.response?.data.duration)
           }
         }
       }
@@ -243,7 +245,7 @@ export default function Order() {
           </DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
-              You are not eligible for additional tokens
+              {`You are not eligible for additional tokens for ${duration || 1} days`}
             </DialogContentText>
           </DialogContent>
           <DialogActions>

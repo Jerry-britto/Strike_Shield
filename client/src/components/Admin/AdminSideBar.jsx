@@ -68,6 +68,15 @@ const AdminSidebar = ({ changePage }) => {
               Inventory
             </div>
           </li>
+           <li>
+            <div
+              onClick={() => changePage(3)}
+              to="/admin/customer"
+              className="cursor-pointer block py-2 px-4 rounded font-semibold hover:bg-gray-600"
+            >
+              User Management
+            </div>
+          </li>
           <li>
           <button
           onClick={logout}

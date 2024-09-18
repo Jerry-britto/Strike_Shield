@@ -1,4 +1,3 @@
-import { OrderDetail } from "../models/orderDetails.model.js";
 import { Product } from "../models/product.model.js";
 import products from "../utils/data.js";
 

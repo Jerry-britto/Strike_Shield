@@ -85,7 +85,7 @@ function InventoryPage() {
       </div>
 
       {/* Right Block */}
-      <div className="w-full h-screen p-6 bg-gray-50">
+      <div className="w-full h-screen p-6 bg-orange-100">
         {activeContent === "All Products" && (
           <div>
             <ViewProducts/>

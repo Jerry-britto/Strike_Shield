@@ -43,7 +43,7 @@ export default function InvoicePage() {
       <div className="w-full max-w-3xl bg-white rounded-lg shadow-lg p-6 mb-8" ref={pdfRef}>
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-5xl font-extrabold text-red-800 protest-guerrilla-regular">
-            Athletic Hub
+          StrikeShield
           </h1>
          
         </div>

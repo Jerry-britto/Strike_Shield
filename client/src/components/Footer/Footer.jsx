@@ -17,7 +17,7 @@ export default function Footer() {
           >
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
           </svg>
-          <span class="ml-3 text-xl">Athletes</span>
+          <span class="ml-3 text-xl">StrikeShield</span>
         </a>
 
         <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">

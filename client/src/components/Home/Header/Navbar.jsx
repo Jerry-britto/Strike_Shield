@@ -129,12 +129,12 @@ export default function Navbar() {
           >
             Home
           </NavLink>
-          <div className="cursor-pointer font-medium text-lg hover:text-orange-500 lg:block hidden">
+          <NavLink to={"/about"} className="cursor-pointer font-medium text-lg hover:text-orange-500 lg:block hidden">
             About Us
-          </div>
-          <div className="cursor-pointer text-lg font-medium hover:text-orange-500 lg:block hidden">
+          </NavLink>
+          <NavLink to={"/contact"} className="cursor-pointer text-lg font-medium hover:text-orange-500 lg:block hidden">
             Contact Us
-          </div>
+          </NavLink>
         </div>
 
         <div className="flex gap-5">

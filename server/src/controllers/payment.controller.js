@@ -91,17 +91,28 @@ export async function makePayment(req, res) {
     if (userTokens < originalTotalCost) {
       const cuurDate = new Date();
       const sysDate = req.user.purchaseStamp;
+      let duration = 0;
       let validUserDialog = true;
       if (sysDate === "" || sysDate === undefined) {
         validUserDialog = true;
       } else if (cuurDate < sysDate) {
         validUserDialog = false;
+        duration = sysDate.getDate() - cuurDate.getDate();
       }
-      return res.status(406).json({
-        message: "Do not have enough tokens",
-        validUserDialog,
-        success: false,
-      });
+      if (duration === 0) {
+        return res.status(406).json({
+          message: "Do not have enough tokens",
+          validUserDialog,
+          success: false,
+        });
+      } else {
+        return res.status(406).json({
+          message: "Do not have enough tokens",
+          validUserDialog,
+          duration,
+          success: false,
+        });
+      }
     }
 
     console.log("user tokens before deduction - ", req.user.tokens);
@@ -152,18 +163,18 @@ export async function getPayment(req, res) {
   try {
     const userId = req.user._id;
     console.log(userId);
-    
+
     const payments = await Payment.find({ userId });
 
     if (!payments || payments.length === 0) {
-      console.log('no payments');
-      
+      console.log("no payments");
+
       return res
         .status(200)
         .json({ message: "No payments made", success: true });
     }
     console.log("has payments");
-    
+
     return res.status(200).json({
       message: "Payments retrevied successfully",
       success: true,

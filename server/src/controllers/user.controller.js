@@ -1,5 +1,6 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import { customerQuery } from "../models/customerQuery.model.js";
 
 export async function registerUser(req, res) {
   try {
@@ -163,10 +164,29 @@ export async function validUser(req, res) {
 export async function getUsers(_, res) {
   try {
     const users = await User.find({ isAdmin: false })
-      .select("-password -address -isAdmin -mobile -carts -updatedAt")
+      .select(
+        "-password -address -isAdmin -mobile -carts -updatedAt -purchaseStamp -tokens --__v"
+      )
       .sort({ createdAt: -1 });
 
-    return res.status(200).send(users);
+    if (!users) {
+      return res
+        .status(404)
+        .json({ message: "user's do not exist", success: false });
+    }
+
+    const formattedUsers = users.map((user) => {
+      const userObj = user.toObject();
+      const { first_name, last_name, email, createdAt, _id } = userObj;
+      return {
+        _id,
+        name: `${first_name} ${last_name}`,
+        email,
+        createdAt,
+      };
+    });
+
+    return res.status(200).send(formattedUsers);
   } catch (error) {
     console.log(error);
 
@@ -193,6 +213,8 @@ export async function getTokens(req, res) {
       const currentTime = new Date();
       if (currentTime < user.purchaseStamp) {
         console.log("not eligible for tokens");
+        console.log(user.purchaseStamp.getDate() - currentTime.getDate());
+        
         return res
           .status(403)
           .json({ message: "Token grant limit not reached" });
@@ -203,7 +225,7 @@ export async function getTokens(req, res) {
       return res.status(400).json({
         message: "Kindly provide your credentials",
         success: false,
-      }); 
+      });
     }
 
     // Grant tokens logic here
@@ -236,5 +258,45 @@ export async function getTokens(req, res) {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: error.message });
+  }
+}
+
+export async function addCustomerQuery(req, res) {
+  try {
+    const { name="", email="", message="" } = req.body;
+
+    console.log(req.body);
+    
+    if (!name || !email || !message) {      
+      return res.status(400).json({
+        message: "Kindly provide all the required information",
+        success: false,
+      });
+    }
+
+    const customerQueryData = await customerQuery.create({
+      name,
+      email,
+      message,
+    });
+
+    const checkIfExists = await customerQuery.findById(customerQueryData._id);
+
+    if (!checkIfExists) {
+      return res
+        .status(500)
+        .json({ message: "response was not saved", success: false,customerQueryData });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Thank you for filling in the form", success: true });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "could not add the customer query",
+      reason: error.message,
+      success: false,
+    });
   }
 }

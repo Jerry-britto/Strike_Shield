@@ -2,6 +2,7 @@ import { User } from "../models/user.model.js";
 import { Order } from "../models/order.model.js";
 import { Payment } from "../models/payment.model.js";
 import { OrderDetail } from "../models/orderDetails.model.js";
+import { customerQuery } from "../models/customerQuery.model.js";
 
 const topSoldItems = async () => {
   const topProductSold = await OrderDetail.aggregate([
@@ -166,5 +167,20 @@ export async function getAnalytics(req, res) {
     return res
       .status(500)
       .json({ message: "could not get analytics", reason: error.message });
+  }
+}
+
+export async function getCustomersQueries(req,res){
+  try {
+
+    const customerQueryData = await customerQuery.find({});
+
+    if (!customerQueryData) {
+      return res.status(404).json({message:"No queries found",success:false})
+    }
+
+    return res.status(200).json({message:"retrieved queries",data:customerQueryData})
+  } catch (error) {
+    return res.status(500).json({message:"could not retrieve customers feedback/queries",success:false})
   }
 }

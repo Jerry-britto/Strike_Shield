@@ -22,7 +22,13 @@ function Admin() {
     <div className="flex min-h-screen">
       <AdminSidebar changePage={setPage} />
       <div className="w-full min-h-screen">
-        {page === 1 ? <DashBoardPage /> : <InventoryPage />}
+        {page === 1 ? (
+          <DashBoardPage />
+        ) : page === 2 ? (
+          <InventoryPage />
+        ) : (
+          <CustomerSupport />
+        )}
       </div>
     </div>
   );

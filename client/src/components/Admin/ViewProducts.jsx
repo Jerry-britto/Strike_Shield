@@ -90,7 +90,7 @@ export default function ViewProducts() {
                   <tr key={item.id} className="bg-orange-500 text-white">
                     <td className="px-6 py-4">{item._id}</td>
                     <td className="px-6 py-4">{item.name}</td>
-                    <td className="px-6 py-4">${item.price.toFixed(2)}</td>
+                    <td className="px-6 py-4">₹{item.price.toFixed(2)}</td>
                     <td className="px-6 py-4">{item.stock}</td>
                     <td className="px-6 py-4">{item.totalQuantitySold}</td>
                   </tr>
@@ -107,7 +107,7 @@ export default function ViewProducts() {
                 >
                   <td className="px-6 py-4">{item?._id || index + 1}</td>
                   <td className="px-6 py-4">{item?.name || "item name"}</td>
-                  <td className="px-6 py-4">${item?.price.toFixed(2)}</td>
+                  <td className="px-6 py-4">₹{item?.price.toFixed(2)}</td>
                   <td className="px-6 py-4">{item?.stock}</td>
                   <td className="px-6 py-4">{item?.totalQuantitySold}</td>
                 </tr>
