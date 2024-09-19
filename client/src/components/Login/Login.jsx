@@ -4,10 +4,14 @@ import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import Axios from "axios";
+<<<<<<< HEAD
 import { addUser } from "../../store/slice.js";
 import { useDispatch, useSelector } from "react-redux";
 import Checkbox from '@mui/material/Checkbox';
 
+=======
+import { getUser, setUser } from "../../utils/verifyUser.js";
+>>>>>>> d31b464d13245a7926f2cf5b7fe8a56cfc9e2135
 
 export default function Login() {
   const {
@@ -17,6 +21,7 @@ export default function Login() {
   } = useForm();
 
   const history = useNavigate();
+<<<<<<< HEAD
   const dispath = useDispatch();
   const user = useSelector((state) => state.user);
   const [showPassword,setShowPassword] = useState(false);
@@ -28,6 +33,15 @@ export default function Login() {
       history("/");
     }
   });
+=======
+
+  useEffect(()=>{
+    const user = getUser()
+    if(user){
+      history("/")
+    }
+  })
+>>>>>>> d31b464d13245a7926f2cf5b7fe8a56cfc9e2135
 
   const login = async (data) => {
     console.log(data);
@@ -39,10 +53,18 @@ export default function Login() {
       );
       console.log("response " + res);
       if (res.status === 200) {
+<<<<<<< HEAD
         console.log("data received" + res);
         const { user } = res.data;
         console.log(user);
         dispath(addUser(user));
+=======
+        console.log("response " + res);
+        const { user } = res.data;
+        console.log("User-", user);
+        console.log("User Token  ", user.tokens[0].token);
+        setUser(user);
+>>>>>>> d31b464d13245a7926f2cf5b7fe8a56cfc9e2135
         history("/");
       }
     } catch (error) {

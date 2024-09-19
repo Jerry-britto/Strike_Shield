@@ -25,10 +25,13 @@ export default function Navbar() {
 
   // for handling menu after login
   const [anchorEl, setAnchorEl] = useState(null);
+
   const open = Boolean(anchorEl);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -173,8 +176,8 @@ export default function Navbar() {
                 aria-expanded={open ? "true" : undefined}
                 onClick={handleClick}
               >
-                {user[0].first_name[0].toUpperCase()}
-                {user[0].last_name[0].toUpperCase()}
+                {user && user.first_name[0].toUpperCase()}
+                {user && user.last_name[0].toUpperCase()}
               </Avatar>
 
               <Menu
@@ -231,7 +234,7 @@ export default function Navbar() {
               </ul>
               <Divider />
 
-              {user.length === 0 ? (
+              {!user ? (
                 <NavLink
                   to={"/login"}
                   className="text-center rounded-md mx-12 p-3 mt-4 text-white font-semibold bg-orange-600 "
