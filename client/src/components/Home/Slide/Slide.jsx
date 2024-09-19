@@ -1,13 +1,13 @@
 import { Divider } from "@mui/material";
-import React from "react";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+import { NavLink } from "react-router-dom";
 
-export default function Slide() {
+export default function Slide({ higherViewProducts = [] }) {
   return (
     <div className="p-8 rounded-lg bg-white  mx-10 my-5">
       <h2 className="text-3xl font-bold text-center mb-2">Popular Products</h2>
-      <Divider/>
+      <Divider />
       <Carousel
         additionalTransfrom={0}
         arrows
@@ -61,7 +61,7 @@ export default function Slide() {
         slidesToSlide={1}
         swipeable
       >
-        <div>
+        {/* <div>
             <img src="https://www.teamsports.co.nz/media/catalog/product/cache/fc866fa1157947dbcae7c204ef679120/a/d/adiaibag1-b_2.jpg" alt="" />
         </div>
         <div>
@@ -75,7 +75,13 @@ export default function Slide() {
         </div>
         <div>
             <img src="https://www.windyfightgear.com/cdn/shop/files/Classic-Lace-Up-Leather-Boxing-Glove-Red-3.webp?v=1708012578&width=1445" alt="" />
-        </div>
+        </div> */}
+        {higherViewProducts && higherViewProducts.length>0?
+          higherViewProducts.map((item) => (
+            <NavLink to={`/product/${item._id}`} key={item._id}>
+              <img src={`${item.coverImage}`} alt={`${item.name}`} />
+            </NavLink>
+          )):<div className="font-bold text-xl">No items</div>}
       </Carousel>
     </div>
   );

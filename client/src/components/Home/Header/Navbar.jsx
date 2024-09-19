@@ -3,23 +3,21 @@ import { Avatar, Badge, Divider, Drawer, Menu, MenuItem } from "@mui/material";
 import logo from "../../../assets/LOGO.png";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useEffect, useState } from "react";
-import { NavLink,useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { removeUser } from "../../../store/slice.js";
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 
 export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
 
   const user = useSelector((state) => state.user);
-  const navigate =useNavigate()
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    console.log("logged in user in home page" + user?.length);
-  }, [user]);
 
   const toggleOpen = () => {
     setDrawerOpen((prev) => !prev);
@@ -35,24 +33,28 @@ export default function Navbar() {
     setAnchorEl(null);
   };
 
+  useEffect(()=>{
+    console.log("logged in user - ",user);  
+  },[])
+
   const logout = async () => {
     console.log("logout");
     try {
       const res = await Axios.post(
         "http://localhost:8000/api/v1/user/logout",
         {},
-        {withCredentials:true}
+        { withCredentials: true }
       );
-      console.log(res)
+      // console.log(res);
 
-      if (res.status >= 200 && res.status<=300) {
+      if (res.status >= 200 && res.status <= 300) {
         dispatch(removeUser());
 
-        toast.success("User logged out", {
+        toast.success("Logged out successfully", {
           position: "top-center",
           autoClose: 3000,
         });
-        navigate("/")
+        navigate("/");
       }
     } catch (error) {
       console.log("could not logout due to ", error.message);
@@ -63,18 +65,56 @@ export default function Navbar() {
     }
   };
 
-  const validUser = async()=>{
+  const validUser = async () => {
     try {
-      const res = await Axios.get("http://localhost:8000/api/v1/user/validuser",{withCredentials:true})
+      const res = await Axios.get(
+        "http://localhost:8000/api/v1/user/validuser",
+        { withCredentials: true }
+      );
 
-      if(res.status === 200){
+      if (res.status === 200) {
         console.log(res.data.user);
       }
     } catch (error) {
-      console.log(error.message)
-      
+      console.log(error.message);
     }
-  }
+  };
+
+  const searchForInput = async (e) => {
+    e.preventDefault();
+    if (!searchInput.trim()) {
+      toast.warn("Kindly enter a valid product name", {
+        position: "top-center",
+        autoClose: 2000,
+      });
+    } else {
+      console.log(searchInput);
+      try {
+        const res = await Axios.get(
+          `http://localhost:8000/api/v1/product/search?searchInput=${searchInput}`,
+          { withCredentials: true }
+        );
+        if (res.status === 200) {
+          const id = res.data.productId || "";
+          if (id) {
+            navigate(`/product/${id}`);
+          } else {
+            throw Error("Product not found");
+          }
+          setSearchInput("");
+        } else {
+          throw Error("Product not found");
+        }
+      } catch (error) {
+        console.log(error);
+        setSearchInput("");
+        toast.error("gloves does not exist", {
+          position: "top-center",
+          autoClose: 2000,
+        });
+      }
+    }
+  };
 
   return (
     <div>
@@ -89,35 +129,43 @@ export default function Navbar() {
           >
             Home
           </NavLink>
-          <div className="cursor-pointer font-medium text-lg hover:text-orange-500 lg:block hidden">
+          <NavLink to={"/about"} className="cursor-pointer font-medium text-lg hover:text-orange-500 lg:block hidden">
             About Us
-          </div>
-          <div className="cursor-pointer text-lg font-medium hover:text-orange-500 lg:block hidden">
+          </NavLink>
+          <NavLink to={"/contact"} className="cursor-pointer text-lg font-medium hover:text-orange-500 lg:block hidden">
             Contact Us
-          </div>
+          </NavLink>
         </div>
 
         <div className="flex gap-5">
-          <div>
+          <form onSubmit={searchForInput}>
             <input
               type="text"
               name="search"
               id="search"
+              value={searchInput}
+              autoComplete="off"
+              onChange={(e) => setSearchInput(e.target.value)}
               className="py-2 px-1 text-black rounded-lg"
             />
             <button className="border p-2 outline-none rounded-md relative right-[4rem] box-border bg-orange-600 text-black mx-0 font-semibold hover:text-white">
               Search
             </button>
-          </div>
+          </form>
+
           {user.length === 0 ? (
             <NavLink
               to={"/login"}
-              className="font-semibold text-lg border p-2 box-border rounded-xl cursor-pointer lg:block hidden bg-orange-500 text-black"
+              className="font-semibold text-lg border p-2 box-border rounded-lg  cursor-pointer lg:block hidden bg-orange-500 text-black hover:text-white"
             >
               Login
             </NavLink>
           ) : (
             <div className=" font-medium mt-2 cursor-pointer hidden lg:flex lg:gap-10">
+              <span className="cursor-default mt-2 text-xl">
+                <CurrencyRupeeIcon/>
+              {user[0].tokens.toFixed(2)}
+              </span>
               <Avatar
                 style={{ backgroundColor: "blue", color: "white" }}
                 id="basic-button"
@@ -139,20 +187,22 @@ export default function Navbar() {
                 }}
               >
                 <MenuItem onClick={handleClose}>
+                  <div onClick={() => navigate("/paymenthistory")}>
+                    <CurrencyRupeeIcon />
+                    View Purchases
+                  </div>
+                </MenuItem>
+                <MenuItem onClick={handleClose}>
                   <div onClick={logout}>
                     <LogoutIcon />
                     Logout
                   </div>
                 </MenuItem>
               </Menu>
-
-              <NavLink to={"/carts"} >
-              <Badge
-                badgeContent={`${user[0].carts.length || ""}`}
-                color="primary"
-              >
-                <ShoppingCartIcon style={{ fontSize: "30px" }} />
-              </Badge>
+              <NavLink to={"/carts"}>
+                <Badge color="primary">
+                  <ShoppingCartIcon style={{ fontSize: "30px" }} />
+                </Badge>
               </NavLink>
             </div>
           )}
@@ -163,10 +213,16 @@ export default function Navbar() {
             </button>
             <Drawer onClose={toggleOpen} open={drawerOpen} anchor="right">
               <ul className="list-none flex flex-col gap-4 p-14">
-                <NavLink to={"/"} className="font-semibold cursor-pointer hover:text-orange-500">
+                <NavLink
+                  to={"/"}
+                  className="font-semibold cursor-pointer hover:text-orange-500"
+                >
                   Home
                 </NavLink>
-                <li onClick={validUser} className="font-semibold cursor-pointer hover:text-orange-500">
+                <li
+                  onClick={validUser}
+                  className="font-semibold cursor-pointer hover:text-orange-500"
+                >
                   About Us
                 </li>
                 <li className="font-semibold cursor-pointer hover:text-orange-500">

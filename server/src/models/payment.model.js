@@ -6,14 +6,30 @@ const PaymentSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Order",
     },
+    userId:{
+      type:Schema.Types.ObjectId,
+      ref:"User"
+    },
     paymentDate: {
       type: String,
-      required: true,
     },
     paymentAmount: {
       type: Number,
-      required: true,
     },
+    discount:{
+      type:Boolean,
+      default:false
+    },
+    deliveryCharge:{
+      type:Boolean,
+      default:false
+    },
+    receipt:Object,
+    status:{
+      type:String,
+      enum:["SUCCESS","PENDING"],
+      default:"PENDING"
+    }
   },
   { timestamps: true }
 );

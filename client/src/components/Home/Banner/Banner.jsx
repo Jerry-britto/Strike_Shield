@@ -3,10 +3,10 @@ import Carousel from 'react-material-ui-carousel'
 
 export default function Banner() {
     const data = [
-        "https://rukminim1.flixcart.com/flap/1680/280/image/1defb861e409319b.jpg?q=50",
-        " https://rukminim1.flixcart.com/flap/1680/280/image/685712c6cefb3c02.jpg?q=50",
-        "https://rukminim1.flixcart.com/flap/1680/280/image/8d4150cc4f3f967d.jpg?q=50",
-        "https://rukminim1.flixcart.com/flap/1680/280/image/685712c6cefb3c02.jpg?q=50"
+        "https://sc04.alicdn.com/kf/U42b08ee128924ffc84605e3d501a6568e/1010373393/U42b08ee128924ffc84605e3d501a6568e.jpg",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6zwm-Ode5qq3YoGZ9jJYKUjzjy5Wg2R4bCQ&s",
+        "https://www.roomaif.com/image/catalog/mainBanner/Mid-Banner2.jpg",
+        "https://img.freepik.com/free-photo/digital-art-style-boxing-day-celebration_23-2151040803.jpg?size=626&ext=jpg&ga=GA1.1.553209589.1715126400&semt=ais"
     ]
   return (
     <div>

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { Cart } from "./cart.model.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -35,15 +36,43 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+<<<<<<< HEAD
     carts: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
       },
     ],
+=======
+    mobile:{
+      type:String,
+      required:true,
+      min:[10,"Number of digits in mobile number should be 10"]
+    },
+    tokens:Number, // for performing payment
+    purchaseStamp:{
+      type:Date,
+    }
+>>>>>>> payment
   },
   { timestamps: true }
 );
+
+// to create a cart after the user is saved
+userSchema.post("save", async function (user, next) {
+  try {
+    const cart = await Cart.findOne({ owner: user._id });
+    if (!cart) {
+      await Cart.create({
+        owner: user._id,
+        items: [],
+      });
+    }
+  } catch (error) {
+    console.log("Error occured while creating cart ", error.message);
+  }
+  next();
+});
 
 userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
@@ -55,21 +84,11 @@ userSchema.methods.generateToken = async function () {
       _id: this._id,
     },
     process.env.ACCESS_TOKEN,
-    {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
-    }
+    // {
+    //   expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+    // }
   );
   return token;
-};
-
-userSchema.methods.addToCart = async function (cartItem) {
-  try {
-    this.carts = this.carts.concat(cartItem);
-    await this.save();
-    return this.carts;
-  } catch (error) {
-    console.log("Could not add to cart due to " + error.message);
-  }
 };
 
 export const User = mongoose.model("User", userSchema);

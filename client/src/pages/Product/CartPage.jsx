@@ -2,85 +2,127 @@ import React, { useState, useEffect } from "react";
 import CartItem from "../../components/Card/CartItem";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import Axios from "axios";
+import Loader from "../../components/Loader/Loader.jsx";
 
 export default function CartPage() {
-  const [data, setData] = useState([
-    {
-      imageLink:
-        "https://t3.ftcdn.net/jpg/05/40/14/74/360_F_540147475_OcIoB8xl5mHXSglIwncqumokZ19hkmLp.jpg",
-      price: 200,
-      name: "Elite Boxing Gloves",
-      qty: 1,
-    },
-    {
-      imageLink:
-        "https://media.istockphoto.com/id/1250685727/vector/realistic-pairs-of-red-boxing-gloves.jpg?s=612x612&w=0&k=20&c=8_bpUgjGLFEy5WKkRMEaKmdpW9MRQFt6Z7wZ-Fq0MSY=",
-      price: 300,
-      name: "Champion Boxing Gloves",
-      qty: 200,
-    },
-    {
-      imageLink:
-        "https://anthonyjoshua.com/cdn/shop/articles/AJ_Fight_Insta_1.png?v=1662478898",
-      price: 500,
-      name: "Ultra Boxing Gloves",
-      qty: 5,
-    },
-    {
-      imageLink:
-        "https://c8.alamy.com/comp/E03GP9/red-boxing-gloves-isolated-on-white-background-E03GP9.jpg",
-      price: 450,
-      name: "Golden Boxing Gloves",
-      qty: 2,
-    },
-  ]);
+  const [data, setData] = useState([]);
 
-  const user = useSelector(state=>state.user)
-  const navigate = useNavigate()
+  const user = useSelector((state) => state.user);
+  const navigate = useNavigate();
+  const [totalAmnt, setTotalAmt] = useState(50);
+  const [loading, setIsLoading] = useState(true);
 
-  useEffect(()=>{
-    if(user && user.length === 0){
-      navigate("/")
+  const getCartDetails = async () => {
+    try {
+      const res = await Axios.get("http://localhost:8000/api/v1/cart/", {
+        withCredentials: true,
+      });
+      const cartItems = res.data?.cart.items;
+
+      setData(cartItems);
+      setTotalAmt(Number(res.data?.cart.cartTotal));
+    } catch (error) {
+      console.log(error.message);
     }
-  })
-
-  const [totalAmnt, setTotalAmt] = useState(0);
-
-  useEffect(() => {
-    (function () {
-      let total = 0;
-      for (let item of data) {
-        total += item.qty * item.price;
-      }
-      setTotalAmt(total);
-    })();
-  }, [data]);
-
-  const handleQtyChange = (event, idx) => {
-    const newQty = parseInt(event.target.value);
-    const updatedData = data.map((item, itr) =>
-      itr === idx ? { ...item, qty: newQty } : item
-    );
-    setData(updatedData);
   };
 
-  return (
-    <div className="my-10">
-      <h1 className="text-4xl font-bold text-center">Your Cart</h1>
-      <h2 className="text-3xl font-semibold text-center mt-2">{`Total Items : ${data.length}`}</h2>
-      {data.map((ele, idx) => (
-        <CartItem
-          key={ele.imageLink}
-          coverImage={ele.imageLink}
-          name={ele.name}
-          qty={ele.qty}
-          price={ele.price}
-          onChange={(event)=>handleQtyChange(event,idx)}
-        />
-      ))}
-      <div className="text-3xl  text-center font-semibold">
-        {`Total Amount: ${totalAmnt}`}
+  useEffect(() => {
+    if (user && user.length === 0) {
+      navigate("/");
+    } else {
+      getCartDetails();
+
+      const timer = setTimeout(() => setIsLoading(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log("cart data ",data);
+  }, [data]);
+
+  const deleteCartItem = async (_id) => {
+    try {
+      const res = await Axios.delete(
+        `http://localhost:8000/api/v1/cart/item/${_id}`,
+        { withCredentials: true }
+      );
+      if (res.status === 200) {
+        console.log("item is removed");
+        setData((prev) => prev.filter((item) => item.product._id != _id));
+      }
+    } catch (error) {
+      console.log(error);
+      console.log(error.message);
+    }
+  };
+
+  const buyBulk = () => {
+    let orders = [];
+    data.forEach((item) =>
+      orders.push({
+        id: item.product._id,
+        pname: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price,
+      })
+    );
+
+    navigate("/orders", {
+      state: {
+        orderDetail: orders
+      },
+    });
+    
+  };
+
+  return loading ? (
+    <Loader className="min-h-screen" />
+  ) : data.length > 0 ? (
+    <div className="my-10 min-h-screen ">
+      <div className="flex flex-wrap justify-center gap-8">
+        <div>
+          {data.map((ele) => (
+            <CartItem
+              key={ele.product._id}
+              id={ele.product._id}
+              name={ele.product.name}
+              price={ele.product.price}
+              quantity={ele.quantity}
+              coverImage={ele.product.coverImage}
+              onDelete={deleteCartItem}
+            />
+          ))}
+        </div>
+        <div>
+          <div className="bg-white shadow-2xl rounded-xl p-8 w-full md:w-80">
+            <div className="mb-8">
+              <h2 className="text-3xl font-semibold text-gray-800 border-b-2 pb-4">
+                Cart Details
+              </h2>
+            </div>
+            <div className="flex justify-between text-gray-700 mb-6">
+              <span className="text-xl font-semibold">Total items:</span>
+              <span className="text-xl font-semibold">{data.length}</span>
+            </div>
+            <div className="flex justify-between text-gray-700">
+              <span className="text-xl font-semibold">Total Cost</span>
+              <span className="text-xl font-semibold">{totalAmnt}</span>
+            </div>
+            <button
+              onClick={buyBulk}
+              className="mt-8 text-2xl w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition duration-300"
+            >
+              Buy Now
+            </button>
+          </div>
+        </div>
       </div>
     </div>
+  ) : (
+    <h1 className="text-5xl flex justify-center items-center font-semibold min-h-screen">
+      Empty Cart
+    </h1>
   );
 }

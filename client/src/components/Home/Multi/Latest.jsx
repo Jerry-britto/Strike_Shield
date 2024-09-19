@@ -1,6 +1,7 @@
 import React from "react";
+import {NavLink} from "react-router-dom";
 
-export default function Latest() {
+export default function Latest({ lowerViewProducts = [] }) {
   const data = [
     {
       imageLink:
@@ -48,7 +49,7 @@ export default function Latest() {
           </div>
         </div>
         <div class="flex flex-wrap -m-4">
-          {data.map((ele, idx) => {
+          {/* {data.map((ele, idx) => {
             return (
               <div class="xl:w-1/4 md:w-1/2 p-4" key={idx}>
                 <div class="bg-gray-100 p-6 rounded-lg">
@@ -69,7 +70,36 @@ export default function Latest() {
                 </div>
               </div>
             );
-          })}
+          })} */}
+
+          {lowerViewProducts && lowerViewProducts.length > 0 ? (
+            lowerViewProducts.map((ele) => {
+              return (
+                <div class="xl:w-1/4 md:w-1/2 p-4" key={ele._id}>
+                  <NavLink to={`/product/${ele._id}`}>
+                  <div class="bg-gray-100 p-6 rounded-lg">
+                    <img
+                      class="h-40 rounded w-full object-cover object-center mb-6 mix-blend-multiply"
+                      src={ele.coverImage}
+                      alt={`${ele.name} Image`}
+                    />
+                    <h3 class="tracking-widest text-indigo-500 text-xs font-medium title-font">
+                      Professional Grade
+                    </h3>
+                    <h2 class="text-lg text-gray-900 font-medium title-font mb-4">
+                      {ele.name}
+                    </h2>
+                    <p class="leading-relaxed text-base">
+                      {ele.description.shortDescription}
+                    </p>
+                  </div>
+                  </NavLink>
+                </div>
+              );
+            })
+          ) : (
+            <div className="font-bold text-xl">No items</div>
+          )}
         </div>
       </div>
     </section>

@@ -1,5 +1,7 @@
 import { Router } from "express";
 import {
+  addCustomerQuery,
+  getTokens,
   loginUser,
   logoutUser,
   registerUser,
@@ -16,5 +18,9 @@ router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJwt,logoutUser);
 
 router.route("/validuser").get(verifyJwt,validUser);
+
+router.route("/gettokens").post(verifyJwt,getTokens);
+
+router.route("/sendfeedback").post(addCustomerQuery);
 
 export default router;
