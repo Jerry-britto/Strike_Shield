@@ -14,7 +14,7 @@ export default function About() {
               At StrikeShield, we believe in rewarding our customers. As a token of appreciation, new users receive 10,000 tokens upon registration. If your order exceeds your current token balance, you can easily receive an additional 5,000 tokens by providing your email and password. Please note, once you exhaust your tokens, additional tokens cannot be granted.
             </p>
             <p className="text-lg text-gray-600 mb-4">
-              Enjoy exclusive discounts with our promotional offers! Orders with 10 or more items automatically receive a 10% discount. Please be aware that a 3% GST will be applied to every order. If your order total is less than 500 rupees, a delivery charge of 500 rupees will be added.
+              Enjoy exclusive discounts with our promotional offers! Orders with 10 or more items automatically receive a 10% discount. Please be aware that a 3% GST will be applied to every order. If your order total is less than 50 rupees, a delivery charge of 500 rupees will be added.
             </p>
           </div>
           <div className="md:w-1/2 mt-6 md:mt-0">

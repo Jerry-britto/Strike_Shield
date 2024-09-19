@@ -119,23 +119,29 @@ export async function getProductById(req, res) {
 export async function getAllProducts(_, res) {
   try {
     const products = await Product.find({});
-    if (!products) {
+    if (!products || products.length === 0) {
       throw new Error("No Products found");
     }
 
-    const higherViewProduct = products
+    // Sort products by views in descending order (high to low)
+    const higherViewProduct = [...products]
       .sort((a, b) => b.views - a.views)
-      .splice(0, 4);
+      .splice(0, 4); // Take top 4 products with highest views
+
+    // Sort products by views in ascending order (low to high) and pick top 4
+    const lowerViewProduct = [...products]
+      .sort((a, b) => a.views - b.views)
+      .splice(0, 4).sort((a, b) => b.views - a.views)
 
     return res.status(200).json({
       message: "products data",
       success: true,
       allProducts: products,
       higherViewProduct,
-      lowerViewProduct: products,
+      lowerViewProduct,
     });
   } catch (error) {
-    return res.json({ message: error.message, success: false });
+    return res.status(500).json({ message: error.message, success: false });
   }
 }
 
