@@ -36,14 +36,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-<<<<<<< HEAD
-    carts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-      },
-    ],
-=======
     mobile:{
       type:String,
       required:true,
@@ -53,7 +45,6 @@ const userSchema = new mongoose.Schema(
     purchaseStamp:{
       type:Date,
     }
->>>>>>> payment
   },
   { timestamps: true }
 );
