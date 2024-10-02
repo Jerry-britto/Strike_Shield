@@ -15,7 +15,7 @@ import NotFound from "./components/404/NotFound.jsx";
 import Order from "./pages/Order/Order.jsx";
 import InvoicePage from "./pages/Order/InvoicePage.jsx";
 import PaymentHistory from "./pages/Order/PaymentHistory.jsx";
-import TopLayout from "./Outlet/TopLayout.jsx";
+import TopLayout from "./layout/TopLayout.jsx";
 import Contact from "./pages/Home/Contact.jsx";
 import About from "./pages/Home/About.jsx";
 

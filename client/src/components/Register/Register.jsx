@@ -1,19 +1,12 @@
-<<<<<<< HEAD
-import React, { useEffect, useState } from "react";
-=======
 import { useEffect, useState } from "react";
->>>>>>> d31b464d13245a7926f2cf5b7fe8a56cfc9e2135
 import { Box, CircularProgress, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import Axios from "axios";
-<<<<<<< HEAD
 import { useSelector } from "react-redux";
-=======
 import { getUser } from "../../utils/verifyUser";
->>>>>>> d31b464d13245a7926f2cf5b7fe8a56cfc9e2135
 
 export default function Register() {
   const {
@@ -34,7 +27,6 @@ export default function Register() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-<<<<<<< HEAD
   const user = useSelector((state) => state.user);
   const redirect = useNavigate();
 
@@ -43,16 +35,6 @@ export default function Register() {
       redirect("/");
     }
   });
-=======
-  const history = useNavigate()
-
-  useEffect(()=>{
-    const user = getUser()
-    if(user){
-      history("/")
-    }
-  })
->>>>>>> d31b464d13245a7926f2cf5b7fe8a56cfc9e2135
 
   const onSubmit = async (data) => {
     setIsLoading(true);

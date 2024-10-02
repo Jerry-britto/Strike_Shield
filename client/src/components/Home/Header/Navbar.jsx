@@ -176,8 +176,8 @@ export default function Navbar() {
                 aria-expanded={open ? "true" : undefined}
                 onClick={handleClick}
               >
-                {user && user.first_name[0].toUpperCase()}
-                {user && user.last_name[0].toUpperCase()}
+                {user && user[0].first_name[0].toUpperCase()}
+                {user && user[0].last_name[0].toUpperCase()}
               </Avatar>
 
               <Menu
