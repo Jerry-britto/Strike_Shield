@@ -1,4 +1,4 @@
-# StrikeShield 🥊
+# StrikeShield
 
 Welcome to **StrikeShield** — your premier online store for top-quality boxing gloves. We offer a wide range of gloves designed for athletes of all levels, ensuring comfort, durability, and superior performance. Built with cutting-edge technologies, our website is designed to make your shopping experience seamless and enjoyable.
 
