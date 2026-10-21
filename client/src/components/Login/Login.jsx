@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import logo from "../../assets/shopping.png";
 import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -8,7 +8,6 @@ import { addUser } from "../../store/slice.js";
 import { useDispatch, useSelector } from "react-redux";
 import Checkbox from '@mui/material/Checkbox';
 
-import { getUser, setUser } from "../../utils/verifyUser.js";
 
 export default function Login() {
   const {
@@ -22,13 +21,11 @@ export default function Login() {
   const user = useSelector((state) => state.user);
   const [showPassword,setShowPassword] = useState(false);
 
-  useEffect(()=>console.log(showPassword),[showPassword])
-
   useEffect(() => {
     if (user && user.length > 0) {
       history("/");
     }
-  });
+  }, [user, history]);
 
   const login = async (data) => {
     console.log(data);

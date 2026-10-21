@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import CartItem from "../../components/Card/CartItem";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -10,37 +10,67 @@ export default function CartPage() {
 
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const [totalAmnt, setTotalAmt] = useState(50);
+  const [totalAmnt, setTotalAmt] = useState(0);
   const [loading, setIsLoading] = useState(true);
-
-  const getCartDetails = async () => {
-    try {
-      const res = await Axios.get("http://localhost:8000/api/v1/cart/", {
-        withCredentials: true,
-      });
-      const cartItems = res.data?.cart.items;
-
-      setData(cartItems);
-      setTotalAmt(Number(res.data?.cart.cartTotal));
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
 
   useEffect(() => {
     if (user && user.length === 0) {
       navigate("/");
-    } else {
-      getCartDetails();
-
-      const timer = setTimeout(() => setIsLoading(false), 2000);
-      return () => clearTimeout(timer);
+      return;
     }
-  }, []);
 
-  useEffect(() => {
-    console.log("cart data ",data);
-  }, [data]);
+    let isActive = true;
+
+    const getCartDetails = async () => {
+      try {
+        const res = await Axios.get("http://localhost:8000/api/v1/cart/", {
+          withCredentials: true,
+        });
+        const rawItems = res.data?.cart?.items || [];
+
+        // The server aggregation returns `product: null` for products that were
+        // deleted from the catalog. Rendering those crashes the page, so they
+        // are filtered out here and (best effort) cleaned up in the background.
+        // Note: the aggregation drops `productId` from the payload, so cleanup
+        // only fires when the id happens to be available.
+        const removedIds = [];
+        const validItems = rawItems.filter((item) => {
+          if (item?.product) return true;
+          if (item?.productId) removedIds.push(item.productId);
+          return false;
+        });
+
+        if (!isActive) return;
+        setData(validItems);
+        setTotalAmt(Number(res.data?.cart?.cartTotal) || 0);
+
+        removedIds.forEach(async (productId) => {
+          try {
+            await Axios.delete(
+              `http://localhost:8000/api/v1/cart/item/${productId}`,
+              { withCredentials: true }
+            );
+          } catch (cleanupError) {
+            // Ignore cleanup failures - the item is already hidden from the UI
+            console.log(
+              "could not remove unavailable item",
+              cleanupError.message
+            );
+          }
+        });
+      } catch (error) {
+        console.log(error.message);
+      } finally {
+        if (isActive) setIsLoading(false);
+      }
+    };
+
+    getCartDetails();
+
+    return () => {
+      isActive = false;
+    };
+  }, [user, navigate]);
 
   const deleteCartItem = async (_id) => {
     try {
@@ -48,9 +78,19 @@ export default function CartPage() {
         `http://localhost:8000/api/v1/cart/item/${_id}`,
         { withCredentials: true }
       );
-      if (res.status === 200) {
+      if (res.status === 200 && res.data?.success) {
         console.log("item is removed");
-        setData((prev) => prev.filter((item) => item.product._id != _id));
+        setData((prev) => {
+          const next = prev.filter((item) => item.product._id !== _id);
+          // Recompute the total locally so it stays accurate after a removal
+          setTotalAmt(
+            next.reduce(
+              (sum, item) => sum + item.product.price * item.quantity,
+              0
+            )
+          );
+          return next;
+        });
       }
     } catch (error) {
       console.log(error);
@@ -59,8 +99,12 @@ export default function CartPage() {
   };
 
   const buyBulk = () => {
+    const purchasable = data.filter((item) => item?.product);
+    if (purchasable.length === 0) {
+      return;
+    }
     let orders = [];
-    data.forEach((item) =>
+    purchasable.forEach((item) =>
       orders.push({
         id: item.product._id,
         pname: item.product.name,

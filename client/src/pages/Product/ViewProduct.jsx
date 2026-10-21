@@ -33,10 +33,18 @@ export default function ViewProduct() {
       );
 
       const newReview = res.data?.productReview;
-      setReviews((prevReviews) =>
-        prevReviews.push(newReview.toString().trim())
-      );
-      window.location.reload();
+      if (newReview) {
+        setReviews((prevReviews) => [
+          ...prevReviews,
+          {
+            _id: Date.now().toString(),
+            content: newReview.comment,
+            user: newReview.user,
+          },
+        ]);
+        setUserReview("");
+        toast.success("Review submitted", { position: "top-center" });
+      }
     } catch (error) {
       toast.error(
         "Something went wrong ensure that you are logged in and try again",
@@ -45,28 +53,39 @@ export default function ViewProduct() {
     }
   };
 
-  const getProductData = async () => {
-    const res = await Axios.get(
-      `http://localhost:8000/api/v1/product/getproduct/${pid}`
-    );
-    const details = res.data?.product;
-    console.log(details);
-    setProductDetails(details);
-
-    const productReviews = await Axios.get(
-      `http://localhost:8000/api/v1/product/review/${pid}`
-    );
-
-    const reviewsData = productReviews.data?.reviews;
-    setReviews(reviewsData);
-    console.log("Reviews " + reviewsData);
-  };
-
   useEffect(() => {
+    let isActive = true;
+
+    const getProductData = async () => {
+      try {
+        const res = await Axios.get(
+          `http://localhost:8000/api/v1/product/getproduct/${pid}`
+        );
+        if (!isActive) return;
+        const details = res.data?.product;
+        setProductDetails(details);
+
+        const productReviews = await Axios.get(
+          `http://localhost:8000/api/v1/product/review/${pid}`
+        );
+
+        if (!isActive) return;
+        const reviewsData = productReviews.data?.reviews || [];
+        setReviews(reviewsData);
+      } catch (error) {
+        console.log(error.message);
+        toast.error("Could not load product details", { position: "top-center" });
+      } finally {
+        if (isActive) setIsLoading(false);
+      }
+    };
+
     getProductData();
-    const timer = setTimeout(() => setIsLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+
+    return () => {
+      isActive = false;
+    };
+  }, [pid]);
 
   const addToCart = async (pid) => {
     if (user && user.length === 0) {
@@ -109,32 +128,55 @@ export default function ViewProduct() {
     }
   };
 
-  return isLoading ? (
-    <div className="min-h-screen flex items-center">
-      <Loader />
-    </div>
-  ) : (
-    productDetails && (
-      <section class="text-gray-600 body-font overflow-hidden">
-        <div class="container px-5 py-24 mx-auto">
-          <div class="lg:w-4/5 mx-auto flex flex-wrap">
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (!productDetails) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <h1 className="text-3xl font-bold mb-4">Product not found</h1>
+        <button
+          className="px-4 py-2 bg-orange-500 text-white rounded-md"
+          onClick={() => navigate("/")}
+        >
+          Go Home
+        </button>
+        <ToastContainer />
+      </div>
+    );
+  }
+
+  return (
+    <section className="text-gray-600 body-font overflow-hidden">
+        <div className="container px-5 py-24 mx-auto">
+          <div className="lg:w-4/5 mx-auto flex flex-wrap">
             <img
               alt="ecommerce"
-              class="lg:w-1/2 w-full lg:h-auto h-64 object-cover object-center rounded"
+              className="lg:w-1/2 w-full lg:h-auto h-64 object-cover object-center rounded"
               src={productDetails.coverImage}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src =
+                  "https://placehold.co/600x600?text=StrikeShield";
+              }}
             />
-            <div class="lg:w-1/2 w-full lg:pl-10 lg:py-6 mt-6 lg:mt-0">
-              <h1 class="text-gray-900 text-3xl title-font font-medium mb-1">
+            <div className="lg:w-1/2 w-full lg:pl-10 lg:py-6 mt-6 lg:mt-0">
+              <h1 className="text-gray-900 text-3xl title-font font-medium mb-1">
                 {productDetails.name}
               </h1>
 
-              <p class="leading-relaxed">
+              <p className="leading-relaxed">
                 {productDetails.description.longDescription}
               </p>
-              <div class="flex mt-6 items-center pb-5 border-b-2 border-gray-100 mb-5">
-                <div class="flex ml-6 items-center">
-                  <span class="mr-3 font-semibold">Quantity</span>
-                  <div class="relative">
+              <div className="flex mt-6 items-center pb-5 border-b-2 border-gray-100 mb-5">
+                <div className="flex ml-6 items-center">
+                  <span className="mr-3 font-semibold">Quantity</span>
+                  <div className="relative">
                     <input
                       type="number"
                       min={1}
@@ -144,14 +186,14 @@ export default function ViewProduct() {
                       max={productDetails.stock}
                       className="ml-4 w-16 p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />{" "}
-                    <span class="absolute right-0 top-0 h-full w-10 text-center text-gray-600 pointer-events-none flex items-center justify-center">
+                    <span className="absolute right-0 top-0 h-full w-10 text-center text-gray-600 pointer-events-none flex items-center justify-center">
                       <svg
                         fill="none"
                         stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        class="w-4 h-4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        className="w-4 h-4"
                         viewBox="0 0 24 24"
                       >
                         <path d="M6 9l6 6 6-6"></path>
@@ -161,8 +203,8 @@ export default function ViewProduct() {
                   {productDetails?.stock === 0?<span className="ml-2 text-red-500">Out of stock</span>:""}
                 </div>
               </div>
-              <div class="flex flex-col">
-                <span class="title-font font-medium text-2xl text-gray-900">
+              <div className="flex flex-col">
+                <span className="title-font font-medium text-2xl text-gray-900">
                   ₹{productDetails.price}
                 </span>
                 <button
@@ -226,6 +268,5 @@ export default function ViewProduct() {
         </div>
         <ToastContainer />
       </section>
-    )
   );
 }

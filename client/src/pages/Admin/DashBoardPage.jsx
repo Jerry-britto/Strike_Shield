@@ -1,48 +1,42 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import AnalyticCard from "../../components/Admin/AnalyticCard";
 import { BarChart } from "@mui/x-charts/BarChart";
 import Axios from "axios";
 
 export default function DashBoardPage() {
-  const [pData, setPData] = useState([2400, 1398, 9800, 390]);
-  const [oData, setOData] = useState([5, 55, 6, 66]);
-  const [topItemsSold, setTopItemssold] = useState([{}, {}, {}]);
+  const [pData, setPData] = useState([]);
+  const [oData, setOData] = useState([]);
+  const [topItemsSold, setTopItemssold] = useState([]);
   const xLabels = ["June", "July", "August", "September"];
 
   const [data, setData] = useState();
 
-  const setRevenue = (monthlyRevenue) => {
-    let monthlyRevenueData = [];
-    let monthlyOrderData = [];
-    console.log("received reven ", monthlyRevenue);
-    monthlyRevenue.forEach((element) => {
-      monthlyRevenueData.push(element.totalRevenue);
-      monthlyOrderData.push(element.totalOrders);
-    });
-    console.log("monthly revenues - ", monthlyRevenueData);
-
-    setPData(monthlyRevenueData);
-    setOData(monthlyOrderData);
-  };
-
-  const getAnalytics = async () => {
-    try {
-      const res = await Axios.get(
-        "http://localhost:8000/api/v1/admin/analytics",
-        { withCredentials: true }
-      );
-
-      console.log(res.data);
-      setData(res.data);
-      setRevenue(res.data.monthlyOrderRevenue);
-      setTopItemssold(res.data.topSoldProductList);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
+    let isActive = true;
+
+    const getAnalytics = async () => {
+      try {
+        const res = await Axios.get(
+          "http://localhost:8000/api/v1/admin/analytics",
+          { withCredentials: true }
+        );
+
+        if (!isActive) return;
+        const monthlyRevenue = res.data?.monthlyOrderRevenue || [];
+        setData(res.data);
+        setPData(monthlyRevenue.map((element) => element.totalRevenue));
+        setOData(monthlyRevenue.map((element) => element.totalOrders));
+        setTopItemssold(res.data?.topSoldProductList || []);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     getAnalytics();
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   return (
@@ -53,17 +47,17 @@ export default function DashBoardPage() {
       >
         <AnalyticCard
           title={"Total Revenue"}
-          content={`₹ ${data?.totalSales || 5}`}
+          content={`₹ ${data?.totalSales ?? "—"}`}
         />
         <AnalyticCard
           title={"Registered Users"}
-          content={`${data?.registeredUserCount || 5}`}
+          content={`${data?.registeredUserCount ?? "—"}`}
         />
         <AnalyticCard
           title={"Products Sold"}
-          content={`${data?.productsSoldCount || 5}`}
+          content={`${data?.productsSoldCount ?? "—"}`}
         />
-        <AnalyticCard title={"orders"} content={data?.totalOrderCount || 5} />
+        <AnalyticCard title={"orders"} content={data?.totalOrderCount ?? "—"} />
       </div>
       <div className="w-full flex flex-wrap justify-center mt-5">
         <div className=" bg-white mr-3 p-2 rounded-md">
@@ -117,22 +111,21 @@ export default function DashBoardPage() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {topItemsSold &&
-                topItemsSold.map(
-                  (ele, index) =>
-                    index < 3 && (
-                      <tr className={``}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {index + 1}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {ele?.productName || "boxing glove"}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {ele?.totalQuantitySold || 5}
-                        </td>
-                      </tr>
-                    )
-                )}
+                topItemsSold
+                  .slice(0, 3)
+                  .map((ele, index) => (
+                    <tr key={ele?.productName || index}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {index + 1}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {ele?.productName || "boxing glove"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {ele?.totalQuantitySold ?? "—"}
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>

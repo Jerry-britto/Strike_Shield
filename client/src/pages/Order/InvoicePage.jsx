@@ -1,4 +1,4 @@
-import React, { useEffect,useRef } from "react";
+import { useEffect,useRef } from "react";
 import ReceiptCard from "../../components/Card/ReceiptCard";
 import { useLocation, useNavigate } from "react-router-dom";
 import html2canvas from "html2canvas";
@@ -12,14 +12,10 @@ export default function InvoicePage() {
   const pdfRef = useRef()
   useEffect(()=>{
     if (paymentReceiptData === "") {
-      navigate("/")
+      navigate("/paymenthistory")
     }
-    console.log(paymentReceiptData);
-    
-  })
+  }, [paymentReceiptData, navigate])
   const handleDownloadPDF = () => {
-    // Logic to download the receipt as a PDF
-    console.log("Download PDF clicked");
     const input = pdfRef.current;
     html2canvas(input).then((canvas)=>{
       const imgData = canvas.toDataURL("image/png");
@@ -37,6 +33,10 @@ export default function InvoicePage() {
     .catch(e=>console.log(e)
     )
   };
+  if (paymentReceiptData === "") {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col items-center p-12">
         

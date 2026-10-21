@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import RegisteredUsers from "../../components/Admin/RegisteredUsers";
 import CustomerFeedback from "../../components/Admin/CustomerFeedback";
 

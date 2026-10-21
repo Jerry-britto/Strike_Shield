@@ -1,0 +1,6 @@
+.playwright-mcp
+node_modules
+.env
+.env.local
+opencode.json
+AGENTS.md

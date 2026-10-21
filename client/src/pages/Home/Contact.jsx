@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import Axios from "axios";
 
@@ -56,7 +56,7 @@ export default function Contact() {
               Contact Us
             </h1>
             <p className="lg:w-2/3 mx-auto leading-relaxed text-base text-white">
-              We'd love to hear from you! Kindly provide your feedback.
+              We&apos;d love to hear from you! Kindly provide your feedback.
             </p>
           </div>
           <div className="lg:w-1/2 md:w-2/3 mx-auto bg-white rounded-lg p-8 shadow-lg">

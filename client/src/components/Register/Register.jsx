@@ -2,11 +2,9 @@ import { useEffect, useState } from "react";
 import { Box, CircularProgress, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import Axios from "axios";
 import { useSelector } from "react-redux";
-import { getUser } from "../../utils/verifyUser";
 
 export default function Register() {
   const {
@@ -34,7 +32,7 @@ export default function Register() {
     if (user && user.length > 0) {
       redirect("/");
     }
-  });
+  }, [user, redirect]);
 
   const onSubmit = async (data) => {
     setIsLoading(true);

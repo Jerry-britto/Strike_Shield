@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Axios from "axios";
 
 export default function ViewProducts() {
@@ -25,23 +25,28 @@ export default function ViewProducts() {
     setSearchedProduct(searchProduct);
   };
 
-  const getData = async () => {
-    try {
-      const res = await Axios.get(
-        "http://localhost:8000/api/v1/admin/productanalytics/",
-        { withCredentials: true }
-      );
-      if (res.status === 200) {
-        setData(res.data.results);
-        console.log("received data ", data[0]);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
+    let isActive = true;
+
+    const getData = async () => {
+      try {
+        const res = await Axios.get(
+          "http://localhost:8000/api/v1/admin/productanalytics/",
+          { withCredentials: true }
+        );
+        if (res.status === 200 && isActive) {
+          setData(res.data.results);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     getData();
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   return (

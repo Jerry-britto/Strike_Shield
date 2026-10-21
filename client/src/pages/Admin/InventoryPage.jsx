@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import AddProduct from "../../components/Admin/AddProduct";
 import UpdateProduct from "../../components/Admin/UpdateProduct";
 import { ToastContainer, toast } from "react-toastify";

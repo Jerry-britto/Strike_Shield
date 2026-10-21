@@ -24,6 +24,9 @@ export const getCart = async (userId) => {
       $project: {
         product: { $first: "$product" },
         quantity: "$items.quantity",
+        // Keep the raw productId so clients can identify (and delete) cart
+        // items whose product no longer exists (`product` is null for those).
+        productId: "$items.productId",
       },
     },
     {
@@ -138,26 +141,9 @@ export async function deleteCartItem(req, res) {
       throw new Error("Invalid Product id");
     }
 
-    const product = await Product.findById(productId);
-
-    if (!product) {
-      throw new Error("Product does not exist");
-    }
-
-    // taken into consideration during payment
-    // get the user's cart
-    // const cart = await Cart.findOne({ owner: req.user._id });
-    // console.log("\n\nCart - " + cart);
-    // console.log("\n\nproduct before minimizing stock ", product);
-
-    // // increment the current stock of the product
-    // const item = cart.items?.find(
-    //   (ele) => ele.productId.toString() === productId
-    // );
-    // console.log(item.quantity);
-    // product.stock += item.quantity;
-
-    // console.log("\n\nproduct after minimizing stock ", product);
+    // Note: no Product.findById existence check here on purpose. Carts can
+    // contain items whose product has since been deleted from the catalog,
+    // and those orphans must still be removable from the cart.
 
     const updatedCart = await Cart.findOneAndUpdate(
       {

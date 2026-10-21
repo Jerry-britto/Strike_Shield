@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import Loader from "../Loader/Loader.jsx";

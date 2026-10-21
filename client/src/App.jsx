@@ -47,7 +47,9 @@ const router = createBrowserRouter(
 
       <Route path="/product/:pid" element={<ViewProduct />} />
 
-      <Route path="/paymenthistory" index element={<PaymentHistory />} />
+      <Route path="/paymenthistory" element={<TopLayout />}>
+        <Route index element={<PaymentHistory />} />
+      </Route>
 
       <Route element={<TopLayout/>}>
       <Route path="/orders" element={<Order />} />

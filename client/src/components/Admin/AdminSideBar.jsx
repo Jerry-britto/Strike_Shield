@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { removeUser } from "../../store/slice.js";
 import Axios from "axios";
@@ -12,9 +12,10 @@ const AdminSidebar = ({ changePage }) => {
   const [adminName, setAdminName] = useState("");
 
   useEffect(() => {
-    let name = user[0].first_name + " " + user[0].last_name;
-    setAdminName(name);
-  });
+    if (user && user.length > 0) {
+      setAdminName(user[0].first_name + " " + user[0].last_name);
+    }
+  }, [user]);
 
   const logout = async () => {
     console.log("logout");
@@ -27,20 +28,21 @@ const AdminSidebar = ({ changePage }) => {
       // console.log(res);
 
       if (res.status >= 200 && res.status <= 300) {
-        dispatch(removeUser());
-
         toast.success("Logged out successfully", {
           position: "top-center",
           autoClose: 3000,
         });
-        navigate("/");
       }
     } catch (error) {
+      // Clear the local session even if the server call fails (expired cookie)
       console.log("could not logout due to ", error.message);
-      toast.error("Could not logout please try again", {
+      toast.error("Session expired, you have been logged out", {
         position: "top-center",
         autoClose: 3000,
       });
+    } finally {
+      dispatch(removeUser());
+      navigate("/");
     }
   };
 

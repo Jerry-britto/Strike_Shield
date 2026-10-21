@@ -14,8 +14,11 @@ function Admin() {
   useEffect(() => {
     if (user && user.length === 0) {
       navigate("/");
+    } else if (user && user.length > 0 && !user[0]?.isAdmin) {
+      // A non-admin logged-in user has no business on the admin dashboard
+      navigate("/");
     }
-  });
+  }, [user, navigate]);
 
   return (
     // <div className='flex justify-center items-center bg-red-500 p-2'>Welcome Admin</div>

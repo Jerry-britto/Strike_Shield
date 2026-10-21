@@ -2,7 +2,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Avatar, Badge, Divider, Drawer, Menu, MenuItem } from "@mui/material";
 import logo from "../../../assets/LOGO.png";
 import MenuIcon from "@mui/icons-material/Menu";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -36,10 +36,6 @@ export default function Navbar() {
     setAnchorEl(null);
   };
 
-  useEffect(()=>{
-    console.log("logged in user - ",user);  
-  },[])
-
   const logout = async () => {
     console.log("logout");
     try {
@@ -51,35 +47,22 @@ export default function Navbar() {
       // console.log(res);
 
       if (res.status >= 200 && res.status <= 300) {
-        dispatch(removeUser());
-
         toast.success("Logged out successfully", {
           position: "top-center",
           autoClose: 3000,
         });
-        navigate("/");
       }
     } catch (error) {
+      // Even if the server call fails (e.g. expired cookie -> 401) the local
+      // session must still be cleared, otherwise the user is stuck "logged in".
       console.log("could not logout due to ", error.message);
-      toast.error("Could not logout please try again", {
+      toast.error("Session expired, you have been logged out", {
         position: "top-center",
         autoClose: 3000,
       });
-    }
-  };
-
-  const validUser = async () => {
-    try {
-      const res = await Axios.get(
-        "http://localhost:8000/api/v1/user/validuser",
-        { withCredentials: true }
-      );
-
-      if (res.status === 200) {
-        console.log(res.data.user);
-      }
-    } catch (error) {
-      console.log(error.message);
+    } finally {
+      dispatch(removeUser());
+      navigate("/");
     }
   };
 
@@ -167,7 +150,7 @@ export default function Navbar() {
             <div className=" font-medium mt-2 cursor-pointer hidden lg:flex lg:gap-10">
               <span className="cursor-default mt-2 text-xl">
                 <CurrencyRupeeIcon/>
-              {user[0].tokens.toFixed(2)}
+              {(Number(user[0].tokens) || 0).toFixed(2)}
               </span>
               <Avatar
                 style={{ backgroundColor: "blue", color: "white" }}
@@ -189,6 +172,13 @@ export default function Navbar() {
                   "aria-labelledby": "basic-button",
                 }}
               >
+                {user[0]?.isAdmin && (
+                  <MenuItem onClick={handleClose}>
+                    <div onClick={() => navigate("/admin")}>
+                      Admin Dashboard
+                    </div>
+                  </MenuItem>
+                )}
                 <MenuItem onClick={handleClose}>
                   <div onClick={() => navigate("/paymenthistory")}>
                     <CurrencyRupeeIcon />
@@ -222,19 +212,22 @@ export default function Navbar() {
                 >
                   Home
                 </NavLink>
-                <li
-                  onClick={validUser}
+                <NavLink
+                  to={"/about"}
                   className="font-semibold cursor-pointer hover:text-orange-500"
                 >
                   About Us
-                </li>
-                <li className="font-semibold cursor-pointer hover:text-orange-500">
+                </NavLink>
+                <NavLink
+                  to={"/contact"}
+                  className="font-semibold cursor-pointer hover:text-orange-500"
+                >
                   Contact Us
-                </li>
+                </NavLink>
               </ul>
               <Divider />
 
-              {!user ? (
+              {user.length === 0 ? (
                 <NavLink
                   to={"/login"}
                   className="text-center rounded-md mx-12 p-3 mt-4 text-white font-semibold bg-orange-600 "
@@ -242,13 +235,35 @@ export default function Navbar() {
                   Login
                 </NavLink>
               ) : (
-                <button
-                  className="bg-orange-600 mx-12 mt-2 p-2 text-white rounded-md"
-                  onClick={logout}
-                >
-                  <LogoutIcon />
-                  Logout
-                </button>
+                <>
+                  <NavLink
+                    to={"/carts"}
+                    className="font-semibold cursor-pointer hover:text-orange-500"
+                  >
+                    Cart
+                  </NavLink>
+                  <NavLink
+                    to={"/paymenthistory"}
+                    className="font-semibold cursor-pointer hover:text-orange-500"
+                  >
+                    View Purchases
+                  </NavLink>
+                  {user[0]?.isAdmin && (
+                    <NavLink
+                      to={"/admin"}
+                      className="font-semibold cursor-pointer hover:text-orange-500"
+                    >
+                      Admin Dashboard
+                    </NavLink>
+                  )}
+                  <button
+                    className="bg-orange-600 mx-12 mt-2 p-2 text-white rounded-md"
+                    onClick={logout}
+                  >
+                    <LogoutIcon />
+                    Logout
+                  </button>
+                </>
               )}
             </Drawer>
           </div>

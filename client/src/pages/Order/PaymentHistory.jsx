@@ -1,46 +1,47 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Axios from "axios";
 
-export default function PaymentHistory({}) {
+export default function PaymentHistory() {
   const [payments, setPayments] = useState([]);
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
-
-  const getPayments = async () => {
-    console.log("user id -",user[0]._id);
-    
-    try {
-      const res = await Axios.get(
-        "http://localhost:8000/api/v1/orders/payment/",
-        { withCredentials:true}
-      );
-      console.log(res);
-      
-      if (
-        res.status === 200 &&
-        res.data.message === "Payments retrevied successfully"
-      ) {
-        console.log("payments - ", res.data.payments);
-        
-        setPayments(res.data.payments);
-      }
-    } catch (error) {
-      console.log("could not get payments", error);
-    }
-  };
 
   useEffect(() => {
     if (user && user.length === 0) {
       // for logged out users
       navigate("/");
-    } else {
-      console.log("getting payments");
-      
-      getPayments();
+      return;
     }
-  }, []);
+
+    let isActive = true;
+
+    const getPayments = async () => {
+      try {
+        const res = await Axios.get(
+          "http://localhost:8000/api/v1/orders/payment/",
+          { withCredentials: true }
+        );
+
+        if (
+          res.status === 200 &&
+          res.data.message === "Payments retrevied successfully" &&
+          isActive
+        ) {
+          setPayments(res.data.payments || []);
+        }
+      } catch (error) {
+        console.log("could not get payments", error);
+      }
+    };
+
+    getPayments();
+
+    return () => {
+      isActive = false;
+    };
+  }, [user, navigate]);
 
   function showReceipt(receipt) {
     navigate("/receipt", { state: receipt });
@@ -70,13 +71,15 @@ export default function PaymentHistory({}) {
                 } hover:bg-orange-200`}
               >
                 <td className="py-4 px-5 border-b border-orange-300 text-xl">
-                  {payment._id || "payment id"}
+                  {payment._id || "—"}
                 </td>
                 <td className="py-4 px-5 border-b border-orange-300 text-xl">
-                  {payment.createdAt.toString().split("T")[0] || "payment date"}
+                  {payment.createdAt
+                    ? payment.createdAt.toString().split("T")[0]
+                    : "—"}
                 </td>
                 <td className="py-4 px-5 border-b border-orange-300 text-xl">
-                ₹{payment.paymentAmount || 555555}
+                {payment.paymentAmount != null ? `₹${payment.paymentAmount}` : "—"}
                 </td>
                 <td
                   className={`py-4 px-5 border-b border-orange-300 font-semibold text-orange-700 cursor-pointer hover:text-orange-900`}

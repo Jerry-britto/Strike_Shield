@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function CartItem({
@@ -37,7 +37,16 @@ export default function CartItem({
         to={`/product/${id}`}
         className="flex-shrink-0 hover:border-2 hover:border-orange-300 hover:rounded-lg p-2 cursor-pointer"
       >
-        <img className="h-24 w-24 object-cover" src={coverImage} alt={name} />
+        <img
+          className="h-24 w-24 object-cover"
+          src={coverImage}
+          alt={name}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src =
+              "https://placehold.co/200x200?text=StrikeShield";
+          }}
+        />
       </Link>
       <div className="ml-4 flex-grow">
         <h2 className="text-2xl font-bold text-gray-700">{name}</h2>

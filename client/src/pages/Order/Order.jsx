@@ -20,6 +20,13 @@ export default function Order() {
 
   const orderDetail = location.state?.orderDetail;
 
+  // Guard against direct visits / refreshes that lose the router state
+  useEffect(() => {
+    if (!orderDetail) {
+      navigate("/");
+    }
+  }, [orderDetail, navigate]);
+
   const [costOfProduct, setCostOfProduct] = useState(0);
   const [totalCost, setTotalCost] = useState(0);
   const [isDeliveryCost, setIsDeliveryCost] = useState(false);
@@ -76,7 +83,7 @@ export default function Order() {
       }
     } catch (error) {
       console.log(error);
-      if (error.response.status !== 200) {
+      if (error.response && error.response.status !== 200) {
         toast.warn(error.response.data.message || error.message, {
           autoClose: 3000,
           position: "top-center",
@@ -86,7 +93,9 @@ export default function Order() {
     }
   };
 
-  const calculateSum = () => {
+  useEffect(() => {
+    if (!orderDetail) return;
+
     let cost = 0,
       qty = 0;
 
@@ -118,10 +127,6 @@ export default function Order() {
 
     setCostOfProduct(cost);
     setTotalCost(finalCost);
-  };
-
-  useEffect(() => {
-    if (orderDetail) calculateSum();
   }, [orderDetail]);
 
   const performPayment = async () => {
@@ -179,7 +184,7 @@ export default function Order() {
     }
   };
 
-  return isProcessing ? (
+  return !orderDetail ? null : isProcessing ? (
     <Loader />
   ) : (
     <>
@@ -199,7 +204,7 @@ export default function Order() {
           <DialogContent dividers ref={descriptionElementRef} tabIndex={-1}>
             <div className="flex flex-col items-center bg-gray-100 p-6 rounded-lg shadow-md max-w-md mx-auto mt-10">
               <h5 className="text-red-500 text-sm font-semibold mb-4">
-                Note: You won't be eligible for extra tokens for another five
+                Note: You won&apos;t be eligible for extra tokens for another five
                 days after submission.
               </h5>
               <input
@@ -302,7 +307,7 @@ export default function Order() {
               onClick={performPayment}
               className="mt-8 font-semibold text-xl w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition duration-300"
             >
-              Procced to checkout
+              Proceed to checkout
             </button>
           </div>
         </div>

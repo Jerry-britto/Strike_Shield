@@ -13,7 +13,7 @@ export const ecommSlice = createSlice({
       const user = action.payload;
       state.user.push(user);
     },
-    removeUser: function (state, _) {
+    removeUser: function (state) {
       state.user.pop();
     },
     setProductsData: function (state, action) {

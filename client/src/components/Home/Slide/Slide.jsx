@@ -79,7 +79,17 @@ export default function Slide({ higherViewProducts = [] }) {
         {higherViewProducts && higherViewProducts.length>0?
           higherViewProducts.map((item) => (
             <NavLink to={`/product/${item._id}`} key={item._id}>
-              <img src={`${item.coverImage}`} alt={`${item.name}`} />
+              <img
+                src={`${item.coverImage}`}
+                alt={`${item.name}`}
+                onError={(e) => {
+                  // Some catalog images are hosted on URLs that later die;
+                  // fall back to a neutral placeholder instead of a broken icon
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src =
+                    "https://placehold.co/400x400?text=StrikeShield";
+                }}
+              />
             </NavLink>
           )):<div className="font-bold text-xl">No items</div>}
       </Carousel>

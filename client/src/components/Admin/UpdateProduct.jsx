@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import Loader from "../Loader/Loader.jsx";
 import Axios from "axios";
@@ -26,7 +26,7 @@ export default function UpdateProduct() {
     try {
       setLoading(true);
       let filteredFormData = Object.fromEntries(
-        Object.entries(formData).filter(([key, value]) => value !== "")
+        Object.entries(formData).filter(([, value]) => value !== "")
       );
       console.log("request body data", filteredFormData);
       const res = await Axios.patch(
