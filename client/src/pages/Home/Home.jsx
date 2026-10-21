@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import Banner from "../../components/Home/Banner/Banner.jsx";
 import Slide from "../../components/Home/Slide/Slide.jsx";
 import Latest from "../../components/Home/Multi/Latest.jsx";
-import { useDispatch } from "react-redux";
-import Axios from "axios";
+import api from "../../api/axios.js";
 import { setProductsData } from "../../store/slice.js";
 
 export default function Home() {
   const [products, setProducts] = useState({});
+  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -15,21 +16,19 @@ export default function Home() {
 
     const loadProducts = async () => {
       try {
-        const productDetails = await Axios.get(
-          "http://localhost:8000/api/v1/product"
-        );
+        const res = await api.get("/product");
         if (!isActive) return;
-        const records = productDetails?.data || {};
+        const records = res.data || {};
         setProducts(records);
         dispatch(
           setProductsData(
-            (records.higherViewProduct || []).concat(
-              records.lowerViewProduct || []
-            )
+            (records.higherViewProduct || []).concat(records.lowerViewProduct || [])
           )
         );
       } catch (error) {
         console.log(error.message);
+      } finally {
+        if (isActive) setLoading(false);
       }
     };
 
@@ -40,11 +39,11 @@ export default function Home() {
     };
   }, [dispatch]);
 
-  return  (
-    <div className="w-full min-h-screen bg-slate-200">
+  return (
+    <div className="w-full">
       <Banner />
-      <Slide higherViewProducts={products.higherViewProduct} />
-      <Latest lowerViewProducts={products.lowerViewProduct} />
+      <Slide products={products.higherViewProduct} loading={loading} />
+      <Latest products={products.lowerViewProduct} loading={loading} />
     </div>
   );
 }

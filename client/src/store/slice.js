@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   user: [],
   products: [],
+  cartCount: 0,
 };
 
 export const ecommSlice = createSlice({
@@ -19,6 +20,9 @@ export const ecommSlice = createSlice({
     setProductsData: function (state, action) {
       state.products = action.payload;
     },
+    setCartCount: function (state, action) {
+      state.cartCount = Number(action.payload) || 0;
+    },
     modifyUserTokens: function (state, action) {
       let totalPrice = action.payload;
       state.user[0] = {
@@ -29,7 +33,7 @@ export const ecommSlice = createSlice({
   },
 });
 
-export const { addUser, removeUser, setProductsData, modifyUserTokens } =
+export const { addUser, removeUser, setProductsData, modifyUserTokens, setCartCount } =
   ecommSlice.actions;
 
 export default ecommSlice.reducer;

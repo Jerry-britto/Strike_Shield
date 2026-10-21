@@ -35,7 +35,10 @@ export const verifyJwt = async (req, res, next) => {
 
 export const verifyAdmin = (req, res, next) => {
   if (!req.user.isAdmin) {
-    return res.status(401).json({ message: "Logged in user is not an admin" });
+    // 403 (not 401): the request IS authenticated, the user just isn't an
+    // admin. Using 401 here would wrongly trigger "session expired" handling
+    // on the client (which logs users out on 401).
+    return res.status(403).json({ message: "Logged in user is not an admin" });
   }
   next();
 };

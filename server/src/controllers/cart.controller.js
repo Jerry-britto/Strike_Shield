@@ -79,8 +79,12 @@ export async function addOrUpdateCart(req, res) {
       throw new Error("Invalid Product id");
     }
 
-    // check if the product exists or not
-    const product = await Product.findById(productId);
+    // Product lookup and cart lookup are independent, so run them in parallel
+    // (each is a network round-trip to the database).
+    const [product, cart] = await Promise.all([
+      Product.findById(productId),
+      Cart.findOne({ owner: req.user._id }),
+    ]);
 
     if (!product) {
       throw new Error("Product does not exist");
@@ -91,10 +95,6 @@ export async function addOrUpdateCart(req, res) {
     if (quantity > product.stock) {
       throw new Error("Out of stock");
     }
-
-    // check if the cart exist for the user already exists in the cart
-
-    let cart = await Cart.findOne({ owner: req.user._id });
 
     // if (!cart) {
     //   cart = new Cart({ owner: req.user.id });

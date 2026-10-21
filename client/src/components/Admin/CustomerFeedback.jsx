@@ -1,131 +1,124 @@
-import { useState, useEffect } from "react";
-import Axios from "axios";
+import { useState, useEffect, useMemo } from "react";
+import SearchIcon from "@mui/icons-material/Search";
+import api from "../../api/axios.js";
+import { TableSkeleton } from "../Loader/Skeletons.jsx";
+import { formatDate } from "../../utils/format.js";
 
 export default function CustomerFeedback() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("name");
-
-  // Dummy data for the table
-  const [users, setUsers] = useState([
-    {
-      _id: "1",
-      name: "John Doe",
-      email: "john@example.com",
-      message: "good website",
-      createdAt: "2023-01-15",
-    },
-    {
-      _id: "2",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      message: "product quality could have been better",
-      createdAt: "2023-01-15",
-    },
-    {
-      _id: "3",
-      name: "Sam Wilson",
-      email: "sam@example.com",
-      message: "amazing quality products",
-      createdAt: "2023-01-15",
-
-    },
-  ]);
-
-  const getUsers = async () => {
-    try {
-      const res = await Axios.get(
-        "http://localhost:8000/api/v1/admin/getcustomerresponse/",
-        { withCredentials: true }
-      );
-      if (res.status === 200) {
-        console.log("users retrieved successfully");
-        console.log(res.data);
-        setUsers(res.data.data);
-      }
-    } catch (error) {
-      console.log("could not get users");
-      console.log(error.message);
-      console.log(error.response?.message);
-    }
-  };
+  const [feedback, setFeedback] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getUsers();
+    let isActive = true;
+
+    const getFeedback = async () => {
+      try {
+        const res = await api.get("/admin/getcustomerresponse/");
+        if (res.status === 200 && isActive) {
+          setFeedback(res.data.data || []);
+        }
+      } catch (error) {
+        console.log("could not get feedback", error.message);
+      } finally {
+        if (isActive) setLoading(false);
+      }
+    };
+
+    getFeedback();
+    return () => {
+      isActive = false;
+    };
   }, []);
 
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-  };
-
-  const handleFilterChange = (e) => {
-    setSearchType(e.target.value);
-  };
-
-  const filteredUsers = users.filter((user) =>
-    searchType === "name"
-      ? user.name.toLowerCase().includes(searchTerm.toLowerCase())
-      : user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return feedback.filter((item) =>
+      searchType === "name"
+        ? (item.name || "").toLowerCase().includes(term)
+        : (item.email || "").toLowerCase().includes(term)
+    );
+  }, [feedback, searchTerm, searchType]);
 
   return (
-    <div className="min-h-screen  p-8 w-full">
-      <div className="">
-        {/* Search Bar with Filters */}
-        <div className="flex flex-col md:flex-row justify-between mb-6 bg-white p-6 rounded-xl shadow-lg">
+    <div>
+      {/* Search + filter */}
+      <div className="card mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <SearchIcon
+            fontSize="small"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-navy-400"
+          />
           <input
             type="text"
             placeholder={`Search by ${searchType}`}
             value={searchTerm}
-            onChange={handleSearch}
-            className="w-full md:w-2/3 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            aria-label="Search queries"
+            className="input-base pl-10"
           />
-          <select
-            value={searchType}
-            onChange={handleFilterChange}
-            className="w-full md:w-1/3 p-3 mt-4 md:mt-0 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800"
-          >
-            <option value="name">Search by Name</option>
-            <option value="email">Search by Email</option>
-          </select>
         </div>
+        <select
+          value={searchType}
+          onChange={(e) => setSearchType(e.target.value)}
+          aria-label="Search field"
+          className="input-base sm:w-52"
+        >
+          <option value="name">Search by Name</option>
+          <option value="email">Search by Email</option>
+        </select>
+      </div>
 
-        {/* Table with User Data */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white rounded-xl shadow-md">
-            <thead>
-              <tr className="bg-gradient-to-r from-indigo-500 to-purple-500 text-left text-white text-sm font-semibold">
-                <th className="py-4 px-6">Name</th>
-                <th className="py-4 px-6">Email</th>
-                <th className="py-4 px-6">Date</th>
-                <th className="py-4 px-6">Message</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <tr
-                    key={user._id}
-                    className="border-b border-gray-200 hover:bg-indigo-100 transition-colors duration-200"
-                  >
-                    <td className="py-4 px-6 text-gray-700">{user.name}</td>
-                    <td className="py-4 px-6 text-gray-700">{user.email}</td>
-                    <td className="py-4 px-6 w-3/12 text-gray-700">{user.createdAt.split('T')[0]}</td>
-                    <td className="py-4 px-6 text-gray-700">{user.message}</td>
-                  </tr>
-                ))
-              ) : (
+      {/* Table */}
+      <div className="card overflow-hidden">
+        {loading ? (
+          <div className="p-4">
+            <TableSkeleton rows={5} cols={4} />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-navy-100">
+              <thead className="bg-navy-50 text-left text-sm uppercase tracking-wider text-navy-500">
                 <tr>
-                  <td
-                    colSpan="4"
-                    className="py-4 px-6 text-center text-gray-500"
-                  >
-                    No users found.
-                  </td>
+                  <th className="px-5 py-3">Name</th>
+                  <th className="px-5 py-3">Email</th>
+                  <th className="px-5 py-3">Date</th>
+                  <th className="px-5 py-3">Message</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-navy-100">
+                {filtered.length > 0 ? (
+                  filtered.map((item) => (
+                    <tr key={item._id} className="transition hover:bg-navy-50">
+                      <td className="px-5 py-3 font-medium text-navy-900">
+                        {item.name || "—"}
+                      </td>
+                      <td className="px-5 py-3 text-navy-700">
+                        {item.email || "—"}
+                      </td>
+                      <td className="px-5 py-3 whitespace-nowrap text-navy-700">
+                        {formatDate(item.createdAt)}
+                      </td>
+                      <td className="px-5 py-3 text-navy-700">
+                        {item.message || "—"}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="px-5 py-8 text-center text-navy-400"
+                    >
+                      No queries found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import logo from "../../assets/shopping.png";
 import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import Axios from "axios";
+import { toast } from "react-toastify";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import IconButton from "@mui/material/IconButton";
+import logo from "../../assets/shopping.png";
+import api from "../../api/axios.js";
 import { addUser } from "../../store/slice.js";
 import { useDispatch, useSelector } from "react-redux";
-import Checkbox from '@mui/material/Checkbox';
-
 
 export default function Login() {
   const {
@@ -16,109 +17,157 @@ export default function Login() {
     formState: { errors },
   } = useForm();
 
-  const history = useNavigate();
-  const dispath = useDispatch();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const [showPassword,setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (user && user.length > 0) {
-      history("/");
-    }
-  }, [user, history]);
+    if (user && user.length > 0) navigate("/");
+  }, [user, navigate]);
 
   const login = async (data) => {
-    console.log(data);
+    setSubmitting(true);
     try {
-      const res = await Axios.post(
-        "http://localhost:8000/api/v1/user/login",
-        data,
-        { withCredentials: true }
-      );
-      console.log("response " + res);
+      const res = await api.post("/user/login", data);
       if (res.status === 200) {
-        console.log("data received" + res);
-        const { user } = res.data;
-        console.log(user);
-        dispath(addUser(user));
-        history("/");
+        dispatch(addUser(res.data.user));
+        toast.success("Welcome back!");
+        navigate("/");
       }
     } catch (error) {
-      console.log("Login failed due to " + error);
-      toast.error("Login Fail, Please try again", {
-        position: "top-center",
-        autoClose: 3000,
-      });
+      toast.error(
+        error.response?.data?.message || "Login failed. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="grid grid-col-1 lg:grid-cols-2 min-h-screen">
-      <div className="col-span-1 min-h-screen hidden lg:flex lg:flex-col lg:justify-center lg:my-2 lg:items-center">
-        <img src={logo} alt="Logo" className="mix-blend-multiply" />
-      </div>
-
-      <div className="col-span-1 min-h-screen box-border flex flex-col justify-center items-center mb-10 bg-slate-100">
-        <div className="shadow-2xl flex flex-col py-20 px-8 mx-5 lg:p-16 items-center justify-around bg-red-100 rounded-3xl">
-          <h1 className="font-bold text-4xl mb-2 italic">
-            {" "}
-            <span className="text-orange-600">Welcome</span> Back
-          </h1>
-          <form method="POST" onSubmit={handleSubmit(login)}>
-            <input
-              type="email"
-              className="p-2 rounded-lg w-full my-2"
-              placeholder="Enter Email"
-              {...register("email", { required: true })}
-            />
-            {errors.email && (
-              <span className="text-red-500 my-1 text-sm">
-                Email is required
-              </span>
-            )}
-            <input
-              type={`${!showPassword?"password":"text"}`}
-              className="p-2 rounded-lg w-full"
-              placeholder="Enter Password"
-              {...register("password", { required: true })}
-            />
-           
-            {errors.password && (
-              <span className="text-red-500 text-sm my-1">
-                Password is required
-              </span>
-            )}
-              <label htmlFor="passFor">
-            <span>
-
-            <Checkbox id="passFor" onChange={(e)=>setShowPassword(e.target.checked)} value={showPassword}/>
-            Show Password
-            </span>
-              </label>
-
-            <button className="bg-orange-600 text-white font-bold p-2 rounded-md w-full my-4 text-2xl">
-              Login
-            </button>
-          </form>
-
-          <p className="text-lg font-semibold mt-6">
-            New User{" "}
-            <NavLink
-              to={"/register"}
-              className="hover:underline hover:cursor-pointer text-blue-600"
-            >
-              Sign up
-            </NavLink>
-          </p>
-          <p className="text-lg mt-4">
-            Visit{" "}
-            <NavLink to={"/"} className={"text-blue-600 hover:text-orange-500"}>
-              Home
-            </NavLink>
+    <div className="grid min-h-screen lg:grid-cols-2">
+      {/* Brand panel */}
+      <div className="hidden flex-col justify-between bg-navy-900 p-10 text-white lg:flex">
+        <div className="flex items-center gap-2">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 font-display text-xl">
+            S
+          </span>
+          <span className="font-display text-2xl tracking-wider">
+            STRIKESHIELD
+          </span>
+        </div>
+        <div className="max-w-md">
+          <h2 className="font-display text-5xl leading-tight tracking-wide">
+            Gear up.
+            <br />
+            Level up.
+            <br />
+            <span className="text-brand-500">Never back down.</span>
+          </h2>
+          <p className="mt-4 text-navy-300">
+            Log in to access your cart, track orders and manage your token
+            balance.
           </p>
         </div>
+        <p className="text-sm text-navy-500">
+          Premium boxing &amp; combat gear.
+        </p>
       </div>
-      <ToastContainer />
+
+      {/* Form panel */}
+      <div className="flex items-center justify-center bg-navy-50 px-6 py-12">
+        <div className="w-full max-w-md">
+          <div className="card p-8">
+            <img
+              src={logo}
+              alt="StrikeShield"
+              className="mx-auto mb-4 h-16 w-auto object-contain mix-blend-multiply"
+            />
+            <h1 className="text-center text-3xl font-bold text-navy-900">
+              Welcome back
+            </h1>
+            <p className="mt-1 text-center text-navy-500">
+              Log in to continue shopping
+            </p>
+
+            <form method="POST" onSubmit={handleSubmit(login)} className="mt-6">
+              <label htmlFor="email" className="text-sm font-semibold text-navy-800">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                className="input-base mt-1.5"
+                {...register("email", { required: "Email is required" })}
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.email.message}
+                </p>
+              )}
+
+              <label
+                htmlFor="password"
+                className="mt-4 block text-sm font-semibold text-navy-800"
+              >
+                Password
+              </label>
+              <div className="relative mt-1.5">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  className="input-base pr-12"
+                  {...register("password", { required: "Password is required" })}
+                />
+                <IconButton
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-1 top-1/2 -translate-y-1/2"
+                  size="small"
+                >
+                  {showPassword ? (
+                    <VisibilityOffIcon fontSize="small" />
+                  ) : (
+                    <VisibilityIcon fontSize="small" />
+                  )}
+                </IconButton>
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.password.message}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="btn-primary mt-6 w-full !py-3"
+              >
+                {submitting ? "Logging in…" : "Login"}
+              </button>
+            </form>
+
+            <p className="mt-6 text-center text-navy-600">
+              New here?{" "}
+              <NavLink
+                to="/register"
+                className="font-semibold text-brand-600 hover:text-brand-700"
+              >
+                Create an account
+              </NavLink>
+            </p>
+            <p className="mt-2 text-center text-sm">
+              <NavLink to="/" className="text-navy-500 hover:text-brand-600">
+                ← Continue shopping as guest
+              </NavLink>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

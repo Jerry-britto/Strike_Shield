@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { formatINR } from "../../utils/format.js";
+
+const PLACEHOLDER = "https://placehold.co/300x300/0f172a/ea580c?text=StrikeShield";
 
 export default function CartItem({
   name = "",
@@ -7,70 +11,103 @@ export default function CartItem({
   quantity = 1,
   coverImage = "",
   id = "",
-  onDelete = function () {},
+  onQuantityChange,
+  onDelete,
 }) {
-  const [isBlur, setIsBlur] = useState(false);
-  const navigate = useNavigate()
+  const [removing, setRemoving] = useState(false);
+  const navigate = useNavigate();
 
-  const buyNow = (id, pname, quantity, price) => {
-   
-      navigate("/orders", {
-        state: {
-          orderDetail: {
-            id,
-            pname,
-            quantity,
-            price,
-          },
-        },
-      });
-    
+  const buyNow = () => {
+    navigate("/orders", {
+      state: {
+        orderDetail: { id, pname: name, quantity, price: Number(price) },
+      },
+    });
+  };
+
+  const handleDelete = () => {
+    setRemoving(true);
+    onDelete?.(id);
   };
 
   return (
     <div
-      className={` ${
-        isBlur && "blur-sm"
-      } max-w-xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden flex flex-wrap my-8 p-4`}
+      className={`card flex flex-col gap-4 p-4 transition sm:flex-row sm:items-center ${
+        removing ? "scale-95 opacity-50" : ""
+      }`}
     >
       <Link
         to={`/product/${id}`}
-        className="flex-shrink-0 hover:border-2 hover:border-orange-300 hover:rounded-lg p-2 cursor-pointer"
+        className="shrink-0 overflow-hidden rounded-xl bg-navy-50"
+        aria-label={`View ${name}`}
       >
         <img
           className="h-24 w-24 object-cover"
-          src={coverImage}
+          src={coverImage || PLACEHOLDER}
           alt={name}
+          loading="lazy"
+          width={96}
+          height={96}
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src =
-              "https://placehold.co/200x200?text=StrikeShield";
+            e.currentTarget.src = PLACEHOLDER;
           }}
         />
       </Link>
-      <div className="ml-4 flex-grow">
-        <h2 className="text-2xl font-bold text-gray-700">{name}</h2>
-        <div className="flex items-center mt-2">
-          <span className="text-gray-600 text-2xl font-semibold ">
-            ₹{price.toFixed(2)}
+
+      <div className="min-w-0 flex-1">
+        <Link to={`/product/${id}`}>
+          <h2 className="line-clamp-2 text-lg font-bold text-navy-900 transition hover:text-brand-700">
+            {name}
+          </h2>
+        </Link>
+        <p className="mt-1 text-sm text-navy-500">Unit price {formatINR(price)}</p>
+
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          {/* Quantity stepper */}
+          {onQuantityChange ? (
+            <div className="inline-flex items-center rounded-lg border border-navy-200">
+              <button
+                onClick={() => onQuantityChange(id, Math.max(1, quantity - 1))}
+                disabled={quantity <= 1}
+                aria-label={`Decrease quantity of ${name}`}
+                className="px-3 py-1.5 font-semibold text-navy-700 transition hover:text-brand-600 disabled:opacity-40"
+              >
+                −
+              </button>
+              <span className="w-8 text-center font-semibold">{quantity}</span>
+              <button
+                onClick={() => onQuantityChange(id, quantity + 1)}
+                aria-label={`Increase quantity of ${name}`}
+                className="px-3 py-1.5 font-semibold text-navy-700 transition hover:text-brand-600"
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <span className="rounded-lg bg-navy-100 px-3 py-1.5 text-sm font-semibold text-navy-700">
+              Qty: {quantity}
+            </span>
+          )}
+
+          <span className="ml-auto text-xl font-bold text-navy-900">
+            {formatINR(Number(price) * quantity)}
           </span>
-          <div className="text-xl mx-2 font-semibold">Quantity: {quantity}</div>
-          <button
-            onClick={() => buyNow(id, name, quantity, price.toFixed(2))}
-            className="ml-4 text-md px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
-          >
-            Buy Now
-          </button>
-          <button
-            className="bg-red-500 text-white text-md p-2 ml-2 rounded-md"
-            onClick={() => {
-              setIsBlur(true);
-              onDelete(id);
-            }}
-          >
-            Remove
-          </button>
         </div>
+      </div>
+
+      <div className="flex gap-2 sm:flex-col">
+        <button onClick={buyNow} className="btn-primary !py-2 text-sm">
+          Buy Now
+        </button>
+        <button
+          onClick={handleDelete}
+          aria-label={`Remove ${name} from cart`}
+          className="inline-flex items-center justify-center gap-1 rounded-xl border border-navy-200 px-3 py-2 text-sm font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50"
+        >
+          <DeleteOutlineIcon fontSize="small" />
+          Remove
+        </button>
       </div>
     </div>
   );

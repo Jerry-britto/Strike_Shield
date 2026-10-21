@@ -1,139 +1,115 @@
 import { useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import Loader from "../Loader/Loader.jsx";
-import Axios from "axios";
+import api from "../../api/axios.js";
+
+const initialForm = {
+  id: "",
+  name: "",
+  price: "",
+  stock: "",
+  coverImage: "",
+  shortDescription: "",
+  longDescription: "",
+};
 
 export default function UpdateProduct() {
-  const [formData, setFormData] = useState({
-    id: "",
-    name: "",
-    price: "",
-    stock: "",
-    coverImage: "",
-    shortDescription: "",
-    longDescription: "",
-  });
+  const [formData, setFormData] = useState(initialForm);
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Submitted", formData);
     try {
       setLoading(true);
-      let filteredFormData = Object.fromEntries(
+      // Only send the fields the user actually filled in.
+      const filtered = Object.fromEntries(
         Object.entries(formData).filter(([, value]) => value !== "")
       );
-      console.log("request body data", filteredFormData);
-      const res = await Axios.patch(
-        `http://localhost:8000/api/v1/product/updateproduct/${filteredFormData.id}`,
-        filteredFormData,
-        { withCredentials: true }
+      const res = await api.patch(
+        `/product/updateproduct/${filtered.id}`,
+        filtered
       );
       if (res.status === 200) {
-        setFormData({
-          id: "",
-          name: "",
-          price: "",
-          stock: "",
-          coverImage: "",
-          shortDescription: "",
-          longDescription: "",
-        });
-        console.log("product updated");
-        setLoading(false);
-        toast.success("Product updated in inventory", {
-          position: "top-center",
-          autoClose: 3000,
-        });
+        toast.success("Product updated");
+        setFormData(initialForm);
       }
     } catch (error) {
-      setLoading(false);
       console.log(error);
-      toast.error("Failed to update product", {
-        position: "top-center",
-        autoClose: 3000,
-      });
+      toast.error("Failed to update product");
+    } finally {
+      setLoading(false);
     }
   };
 
-  return loading ? (
-    <Loader />
-  ) : (
-    <div className="max-w-lg mx-auto mt-8 p-6 bg-white shadow-lg rounded-lg">
-      <ToastContainer />
-      <h2 className="text-2xl font-bold text-center mb-6">Update Product</h2>
-      <form onSubmit={handleSubmit}>
-        {/* Product Name */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Product Id <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="id"
-            value={formData.id}
-            onChange={handleInputChange}
-            required
-            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter product id"
-          />
-        </div>
+  if (loading) return <Loader />;
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Product Name
-          </label>
+  return (
+    <div className="card mx-auto max-w-2xl p-6">
+      <h2 className="text-xl font-bold text-navy-900">Update Product</h2>
+      <p className="mt-1 text-sm text-navy-500">
+        Enter the product ID and only the fields you want to change.
+      </p>
+
+      <form onSubmit={handleSubmit} className="mt-5">
+        <label className="text-sm font-semibold text-navy-800">
+          Product ID <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          name="id"
+          value={formData.id}
+          onChange={handleInputChange}
+          required
+          className="input-base mt-1.5 font-mono"
+          placeholder="Enter product id"
+        />
+
+        <div className="mt-4">
+          <label className="text-sm font-semibold text-navy-800">Name</label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter product name"
+            className="input-base mt-1.5"
+            placeholder="New name"
           />
         </div>
 
-        {/* Price and Stock (Grouped in a Row) */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="mt-4 grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Price
-            </label>
+            <label className="text-sm font-semibold text-navy-800">Price (₹)</label>
             <input
               type="number"
               name="price"
               value={formData.price}
               onChange={handleInputChange}
-              min={100}
-              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter product price"
+              min={1}
+              className="input-base mt-1.5"
+              placeholder="780"
             />
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Stock
-            </label>
+            <label className="text-sm font-semibold text-navy-800">Stock</label>
             <input
               type="number"
               name="stock"
               min={1}
               value={formData.stock}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter stock quantity"
+              className="input-base mt-1.5"
+              placeholder="100"
             />
           </div>
         </div>
 
-        {/* Cover Image URL */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className="mt-4">
+          <label className="text-sm font-semibold text-navy-800">
             Cover Image URL
           </label>
           <input
@@ -141,51 +117,43 @@ export default function UpdateProduct() {
             name="coverImage"
             value={formData.coverImage}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter cover image URL"
+            className="input-base mt-1.5"
+            placeholder="https://…"
           />
         </div>
 
-        {/* Short and Long Description (Grouped in a Row) */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="text-sm font-semibold text-navy-800">
               Short Description
             </label>
             <textarea
               name="shortDescription"
               value={formData.shortDescription}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Short description"
-            ></textarea>
+              rows={3}
+              className="input-base mt-1.5 resize-none"
+              placeholder="One-liner"
+            />
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="text-sm font-semibold text-navy-800">
               Long Description
             </label>
             <textarea
               name="longDescription"
               value={formData.longDescription}
               onChange={handleInputChange}
-              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Long description"
-            ></textarea>
+              rows={3}
+              className="input-base mt-1.5 resize-none"
+              placeholder="Full description"
+            />
           </div>
         </div>
 
-        {/* Owner and Category (Grouped in a Row) */}
-
-        {/* Submit Button */}
-        <div className="text-center">
-          <button
-            type="submit"
-            className="w-full p-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition duration-300"
-          >
-            Update Product
-          </button>
-        </div>
+        <button type="submit" className="btn-primary mt-6 w-full">
+          Update Product
+        </button>
       </form>
     </div>
   );

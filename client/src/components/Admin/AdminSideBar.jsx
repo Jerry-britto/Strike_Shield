@@ -1,11 +1,22 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { removeUser } from "../../store/slice.js";
-import Axios from "axios";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import GroupsIcon from "@mui/icons-material/Groups";
+import LogoutIcon from "@mui/icons-material/Logout";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import api from "../../api/axios.js";
+import { removeUser, setCartCount } from "../../store/slice.js";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-const AdminSidebar = ({ changePage }) => {
+const navItems = [
+  { id: 1, label: "Dashboard", Icon: DashboardIcon },
+  { id: 2, label: "Inventory", Icon: Inventory2Icon },
+  { id: 3, label: "User Management", Icon: GroupsIcon },
+];
+
+const AdminSidebar = ({ changePage, activePage }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -13,83 +24,84 @@ const AdminSidebar = ({ changePage }) => {
 
   useEffect(() => {
     if (user && user.length > 0) {
-      setAdminName(user[0].first_name + " " + user[0].last_name);
+      setAdminName(`${user[0].first_name} ${user[0].last_name}`);
     }
   }, [user]);
 
   const logout = async () => {
-    console.log("logout");
     try {
-      const res = await Axios.post(
-        "http://localhost:8000/api/v1/user/logout",
-        {},
-        { withCredentials: true }
-      );
-      // console.log(res);
-
-      if (res.status >= 200 && res.status <= 300) {
-        toast.success("Logged out successfully", {
-          position: "top-center",
-          autoClose: 3000,
-        });
-      }
-    } catch (error) {
-      // Clear the local session even if the server call fails (expired cookie)
-      console.log("could not logout due to ", error.message);
-      toast.error("Session expired, you have been logged out", {
-        position: "top-center",
-        autoClose: 3000,
-      });
+      await api.post("/user/logout", {});
+      toast.success("Logged out successfully");
+    } catch {
+      toast.info("Session expired — you have been logged out");
     } finally {
       dispatch(removeUser());
+      dispatch(setCartCount(0));
       navigate("/");
     }
   };
 
   return (
-    <div className="w-64 min-h-screen bg-gray-800 text-white flex flex-col">
-      <div className="p-6 flex-1">
-        <h1 className="text-3xl font-bold italic">Welcome</h1>
-        <h2 className="mb-6 font-semibold text-lg">{adminName}</h2>
-        <ul className="space-y-2">
-          <li>
-            <div
-              onClick={() => changePage(1)}
-              to="/admin/dashboard"
-              className="cursor-pointer block py-2 px-4 rounded font-semibold hover:bg-gray-600"
-            >
-              Dashboard
-            </div>
-          </li>
-          <li>
-            <div
-              onClick={() => changePage(2)}
-              to="/admin/inventory"
-              className="cursor-pointer block py-2 px-4 rounded font-semibold hover:bg-gray-600"
-            >
-              Inventory
-            </div>
-          </li>
-           <li>
-            <div
-              onClick={() => changePage(3)}
-              to="/admin/customer"
-              className="cursor-pointer block py-2 px-4 rounded font-semibold hover:bg-gray-600"
-            >
-              User Management
-            </div>
-          </li>
-          <li>
-          <button
-          onClick={logout}
-          className="w-full py-2 px-4 bg-red-600 text-white font-semibold rounded hover:bg-red-700"
+    <aside className="flex w-64 shrink-0 flex-col bg-navy-900 text-white">
+      <div className="p-6">
+        <div className="flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 font-display text-lg">
+            S
+          </span>
+          <span className="font-display text-xl tracking-wider">STRIKESHIELD</span>
+        </div>
+        <div className="mt-6 rounded-xl bg-navy-800 p-4">
+          <p className="text-xs uppercase tracking-wide text-navy-400">
+            Signed in as
+          </p>
+          <p className="mt-1 font-semibold">{adminName || "Administrator"}</p>
+          <span className="mt-2 inline-block rounded-full bg-brand-600 px-2 py-0.5 text-xs font-bold">
+            Admin
+          </span>
+        </div>
+      </div>
+
+      <nav className="mt-2 flex-1 px-3">
+        <ul className="space-y-1">
+          {navItems.map(({ id, label, Icon }) => {
+            const isActive = activePage === id;
+            return (
+              <li key={id}>
+                <button
+                  onClick={() => changePage(id)}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-semibold transition ${
+                    isActive
+                      ? "bg-brand-600 text-white shadow"
+                      : "text-navy-300 hover:bg-navy-800 hover:text-white"
+                  }`}
+                >
+                  <Icon fontSize="small" />
+                  {label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      <div className="space-y-2 p-3">
+        <button
+          onClick={() => navigate("/")}
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-3 font-semibold text-navy-300 transition hover:bg-navy-800 hover:text-white"
         >
+          <ArrowBackIcon fontSize="small" />
+          Back to store
+        </button>
+        <button
+          onClick={logout}
+          className="flex w-full items-center gap-3 rounded-xl bg-navy-800 px-4 py-3 font-semibold text-white transition hover:bg-red-600"
+        >
+          <LogoutIcon fontSize="small" />
           Logout
         </button>
-          </li>
-        </ul>
       </div>
-    </div>
+    </aside>
   );
 };
 

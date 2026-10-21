@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Payment } from "../models/payment.model.js";
 import { User } from "../models/user.model.js";
+import { Cart } from "../models/cart.model.js";
 
 // generate invoice
 const generateReceipt = async (paymentId) => {
@@ -144,13 +145,20 @@ export async function makePayment(req, res) {
     await admin.save();
     await payment.save();
 
+    // The order has been paid for — empty the user's cart so purchased items
+    // don't linger in it.
+    await Cart.findOneAndUpdate(
+      { owner: req.user._id },
+      { $set: { items: [] } }
+    );
+
     return res
       .status(200)
       .json({ message: "Payment successful", success: true, receipt });
   } catch (error) {
     console.log(error);
 
-    return res.status().json({
+    return res.status(500).json({
       message: "payment fail",
       reason: error.message,
       success: false,

@@ -1,67 +1,62 @@
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { Avatar, Badge, Divider, Drawer, Menu, MenuItem } from "@mui/material";
-import logo from "../../../assets/LOGO.png";
-import MenuIcon from "@mui/icons-material/Menu";
 import { useState } from "react";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { Avatar, Badge, Drawer, IconButton, Menu, MenuItem } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
+import LogoutIcon from "@mui/icons-material/Logout";
+import PaymentsIcon from "@mui/icons-material/Payments";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import SearchIcon from "@mui/icons-material/Search";
+import logo from "../../../assets/LOGO.png";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import LogoutIcon from "@mui/icons-material/Logout";
-import Axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import { removeUser } from "../../../store/slice.js";
-import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
+import { toast } from "react-toastify";
+import api from "../../../api/axios.js";
+import { removeUser, setCartCount } from "../../../store/slice.js";
+import { formatINR } from "../../../utils/format.js";
+import useCartCount from "../../../hooks/useCartCount.js";
+
+const navLinkClass = ({ isActive }) =>
+  `relative text-sm font-semibold tracking-wide transition-colors ${
+    isActive ? "text-brand-500" : "text-navy-100 hover:text-brand-400"
+  }`;
 
 export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
 
   const user = useSelector((state) => state.user);
+  const cartCount = useSelector((state) => state.cartCount);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const toggleOpen = () => {
-    setDrawerOpen((prev) => !prev);
-  };
+  // Keep the cart badge in sync with the server.
+  useCartCount();
 
-  // for handling menu after login
+  const toggleDrawer = () => setDrawerOpen((prev) => !prev);
+  const closeDrawer = () => setDrawerOpen(false);
+
   const [anchorEl, setAnchorEl] = useState(null);
-
   const open = Boolean(anchorEl);
+  const handleClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const isLoggedIn = user && user.length > 0;
+  const initials = isLoggedIn
+    ? `${user[0]?.first_name?.[0] || ""}${user[0]?.last_name?.[0] || ""}`.toUpperCase()
+    : "";
+  const tokenBalance = Number(user[0]?.tokens) || 0;
 
   const logout = async () => {
-    console.log("logout");
     try {
-      const res = await Axios.post(
-        "http://localhost:8000/api/v1/user/logout",
-        {},
-        { withCredentials: true }
-      );
-      // console.log(res);
-
-      if (res.status >= 200 && res.status <= 300) {
-        toast.success("Logged out successfully", {
-          position: "top-center",
-          autoClose: 3000,
-        });
-      }
-    } catch (error) {
-      // Even if the server call fails (e.g. expired cookie -> 401) the local
-      // session must still be cleared, otherwise the user is stuck "logged in".
-      console.log("could not logout due to ", error.message);
-      toast.error("Session expired, you have been logged out", {
-        position: "top-center",
-        autoClose: 3000,
-      });
+      await api.post("/user/logout", {});
+      toast.success("Logged out successfully");
+    } catch {
+      // Clear the local session even if the server call fails (expired cookie).
+      toast.info("Session expired — you have been logged out");
     } finally {
       dispatch(removeUser());
+      dispatch(setCartCount(0));
       navigate("/");
     }
   };
@@ -69,207 +64,237 @@ export default function Navbar() {
   const searchForInput = async (e) => {
     e.preventDefault();
     if (!searchInput.trim()) {
-      toast.warn("Kindly enter a valid product name", {
-        position: "top-center",
-        autoClose: 2000,
+      toast.warn("Kindly enter a product name to search");
+      return;
+    }
+    try {
+      const res = await api.get("/product/search", {
+        params: { searchInput: searchInput.trim() },
       });
-    } else {
-      console.log(searchInput);
-      try {
-        const res = await Axios.get(
-          `http://localhost:8000/api/v1/product/search?searchInput=${searchInput}`,
-          { withCredentials: true }
-        );
-        if (res.status === 200) {
-          const id = res.data.productId || "";
-          if (id) {
-            navigate(`/product/${id}`);
-          } else {
-            throw Error("Product not found");
-          }
-          setSearchInput("");
-        } else {
-          throw Error("Product not found");
-        }
-      } catch (error) {
-        console.log(error);
-        setSearchInput("");
-        toast.error("gloves does not exist", {
-          position: "top-center",
-          autoClose: 2000,
-        });
-      }
+      const id = res.data?.productId;
+      if (!id) throw new Error("Product not found");
+      navigate(`/product/${id}`);
+      setSearchInput("");
+      closeDrawer();
+    } catch {
+      setSearchInput("");
+      toast.error("No product matches that search");
     }
   };
 
+  const closeAll = () => {
+    handleClose();
+    closeDrawer();
+  };
+
   return (
-    <div>
-      <div className="flex flex-col lg:flex-row justify-around items-center bg-slate-950  p-3 w-full text-white shadow-2xl">
-        <div className="cursor-pointer mr-20 mb-4 lg:mr-0 lg:mb-0">
-          <img src={logo} alt="LOGO" width={"100"} />
-        </div>
-        <div className="flex gap-5">
-          <NavLink
-            to={"/"}
-            className="cursor-pointer font-medium text-lg hover:text-orange-500 lg:block hidden"
-          >
+    <header className="sticky top-0 z-40 w-full bg-navy-900/95 text-white shadow-lg backdrop-blur">
+      <div className="container-page flex items-center justify-between gap-4 py-3">
+        {/* Logo */}
+        <NavLink to="/" className="flex shrink-0 items-center gap-2">
+          <img
+            src={logo}
+            alt="StrikeShield logo"
+            width={92}
+            height={40}
+            className="h-10 w-auto object-contain"
+          />
+        </NavLink>
+
+        {/* Desktop nav */}
+        <nav className="hidden items-center gap-8 lg:flex">
+          <NavLink to="/" className={navLinkClass} end>
             Home
           </NavLink>
-          <NavLink to={"/about"} className="cursor-pointer font-medium text-lg hover:text-orange-500 lg:block hidden">
+          <NavLink to="/about" className={navLinkClass}>
             About Us
           </NavLink>
-          <NavLink to={"/contact"} className="cursor-pointer text-lg font-medium hover:text-orange-500 lg:block hidden">
+          <NavLink to="/contact" className={navLinkClass}>
             Contact Us
           </NavLink>
-        </div>
+        </nav>
 
-        <div className="flex gap-5">
-          <form onSubmit={searchForInput}>
+        {/* Search + actions */}
+        <div className="flex items-center gap-3">
+          <form onSubmit={searchForInput} className="hidden items-center md:flex">
             <input
-              type="text"
+              type="search"
               name="search"
               id="search"
+              aria-label="Search products"
               value={searchInput}
               autoComplete="off"
               onChange={(e) => setSearchInput(e.target.value)}
-              className="py-2 px-1 text-black rounded-lg"
+              placeholder="Search gloves…"
+              className="w-40 rounded-l-xl border border-navy-700 bg-navy-800 px-3 py-2 text-sm text-white placeholder-navy-400 transition focus:w-56 focus:border-brand-500 focus:outline-none lg:w-48"
             />
-            <button className="border p-2 outline-none rounded-md relative right-[4rem] box-border bg-orange-600 text-black mx-0 font-semibold hover:text-white">
-              Search
+            <button
+              type="submit"
+              aria-label="Search"
+              className="rounded-r-xl bg-brand-600 px-3 py-2.5 text-white transition hover:bg-brand-700"
+            >
+              <SearchIcon fontSize="small" />
             </button>
           </form>
 
-          {user.length === 0 ? (
-            <NavLink
-              to={"/login"}
-              className="font-semibold text-lg border p-2 box-border rounded-lg  cursor-pointer lg:block hidden bg-orange-500 text-black hover:text-white"
-            >
-              Login
-            </NavLink>
-          ) : (
-            <div className=" font-medium mt-2 cursor-pointer hidden lg:flex lg:gap-10">
-              <span className="cursor-default mt-2 text-xl">
-                <CurrencyRupeeIcon/>
-              {(Number(user[0].tokens) || 0).toFixed(2)}
+          {isLoggedIn ? (
+            <div className="hidden items-center gap-4 lg:flex">
+              <span className="flex items-center gap-1 rounded-full bg-navy-800 px-3 py-1.5 text-sm font-semibold text-brand-400">
+                <span aria-hidden>₹</span>
+                {formatINR(tokenBalance).replace("₹", "")}
               </span>
+
               <Avatar
-                style={{ backgroundColor: "blue", color: "white" }}
-                id="basic-button"
-                aria-controls={open ? "basic-menu" : undefined}
-                aria-expanded={open ? "true" : undefined}
                 onClick={handleClick}
+                aria-controls={open ? "account-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
+                className="cursor-pointer bg-brand-600 font-semibold"
+                sx={{ width: 40, height: 40 }}
               >
-                {user && user[0].first_name[0].toUpperCase()}
-                {user && user[0].last_name[0].toUpperCase()}
+                {initials}
               </Avatar>
 
+              <NavLink to="/carts" aria-label={`Cart, ${cartCount} items`} className="relative">
+                <Badge badgeContent={cartCount} color="primary" overlap="circular">
+                  <ShoppingCartIcon sx={{ fontSize: 28 }} />
+                </Badge>
+              </NavLink>
+
               <Menu
-                id="basic-menu"
+                id="account-menu"
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleClose}
-                MenuListProps={{
-                  "aria-labelledby": "basic-button",
-                }}
+                MenuListProps={{ "aria-labelledby": "account-button" }}
+                transformOrigin={{ horizontal: "right", vertical: "top" }}
+                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
               >
                 {user[0]?.isAdmin && (
-                  <MenuItem onClick={handleClose}>
-                    <div onClick={() => navigate("/admin")}>
-                      Admin Dashboard
-                    </div>
+                  <MenuItem onClick={() => { closeAll(); navigate("/admin"); }}>
+                    <DashboardIcon fontSize="small" className="mr-2 text-navy-500" />
+                    Admin Dashboard
                   </MenuItem>
                 )}
-                <MenuItem onClick={handleClose}>
-                  <div onClick={() => navigate("/paymenthistory")}>
-                    <CurrencyRupeeIcon />
-                    View Purchases
-                  </div>
+                <MenuItem onClick={() => { closeAll(); navigate("/paymenthistory"); }}>
+                  <PaymentsIcon fontSize="small" className="mr-2 text-navy-500" />
+                  View Purchases
                 </MenuItem>
-                <MenuItem onClick={handleClose}>
-                  <div onClick={logout}>
-                    <LogoutIcon />
-                    Logout
-                  </div>
+                <MenuItem onClick={() => { closeAll(); logout(); }}>
+                  <LogoutIcon fontSize="small" className="mr-2 text-navy-500" />
+                  Logout
                 </MenuItem>
               </Menu>
-              <NavLink to={"/carts"}>
-                <Badge color="primary">
-                  <ShoppingCartIcon style={{ fontSize: "30px" }} />
-                </Badge>
-              </NavLink>
             </div>
+          ) : (
+            <NavLink to="/login" className="hidden btn-primary !py-2 lg:inline-flex">
+              Login
+            </NavLink>
           )}
 
-          <div className="lg:hidden block mt-1  cursor-pointer text-2xl">
-            <button onClick={toggleOpen}>
+          {/* Mobile menu trigger */}
+          <div className="lg:hidden">
+            <IconButton
+              onClick={toggleDrawer}
+              aria-label="Open menu"
+              sx={{ color: "white" }}
+            >
               <MenuIcon />
-            </button>
-            <Drawer onClose={toggleOpen} open={drawerOpen} anchor="right">
-              <ul className="list-none flex flex-col gap-4 p-14">
-                <NavLink
-                  to={"/"}
-                  className="font-semibold cursor-pointer hover:text-orange-500"
-                >
-                  Home
-                </NavLink>
-                <NavLink
-                  to={"/about"}
-                  className="font-semibold cursor-pointer hover:text-orange-500"
-                >
-                  About Us
-                </NavLink>
-                <NavLink
-                  to={"/contact"}
-                  className="font-semibold cursor-pointer hover:text-orange-500"
-                >
-                  Contact Us
-                </NavLink>
-              </ul>
-              <Divider />
-
-              {user.length === 0 ? (
-                <NavLink
-                  to={"/login"}
-                  className="text-center rounded-md mx-12 p-3 mt-4 text-white font-semibold bg-orange-600 "
-                >
-                  Login
-                </NavLink>
-              ) : (
-                <>
-                  <NavLink
-                    to={"/carts"}
-                    className="font-semibold cursor-pointer hover:text-orange-500"
-                  >
-                    Cart
-                  </NavLink>
-                  <NavLink
-                    to={"/paymenthistory"}
-                    className="font-semibold cursor-pointer hover:text-orange-500"
-                  >
-                    View Purchases
-                  </NavLink>
-                  {user[0]?.isAdmin && (
-                    <NavLink
-                      to={"/admin"}
-                      className="font-semibold cursor-pointer hover:text-orange-500"
-                    >
-                      Admin Dashboard
-                    </NavLink>
-                  )}
-                  <button
-                    className="bg-orange-600 mx-12 mt-2 p-2 text-white rounded-md"
-                    onClick={logout}
-                  >
-                    <LogoutIcon />
-                    Logout
-                  </button>
-                </>
-              )}
-            </Drawer>
+            </IconButton>
           </div>
         </div>
       </div>
-      <ToastContainer />
-    </div>
+
+      {/* Mobile drawer */}
+      <Drawer anchor="right" open={drawerOpen} onClose={closeDrawer}>
+        <div className="flex h-full w-72 flex-col bg-navy-900 p-5 text-white">
+          <div className="mb-6 flex items-center justify-between">
+            <span className="font-display text-2xl tracking-wide">Menu</span>
+            <IconButton onClick={closeDrawer} aria-label="Close menu" sx={{ color: "white" }}>
+              <CloseIcon />
+            </IconButton>
+          </div>
+
+          <form onSubmit={searchForInput} className="mb-6 flex items-center">
+            <input
+              type="search"
+              aria-label="Search products"
+              value={searchInput}
+              autoComplete="off"
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search gloves…"
+              className="w-full rounded-l-xl border border-navy-700 bg-navy-800 px-3 py-2 text-sm text-white placeholder-navy-400 focus:outline-none"
+            />
+            <button
+              type="submit"
+              aria-label="Search"
+              className="rounded-r-xl bg-brand-600 px-3 py-2.5 text-white"
+            >
+              <SearchIcon fontSize="small" />
+            </button>
+          </form>
+
+          <nav className="flex flex-col gap-1">
+            <NavLink to="/" onClick={closeAll} className="rounded-lg px-3 py-2.5 font-semibold hover:bg-navy-800">
+              Home
+            </NavLink>
+            <NavLink to="/about" onClick={closeAll} className="rounded-lg px-3 py-2.5 font-semibold hover:bg-navy-800">
+              About Us
+            </NavLink>
+            <NavLink to="/contact" onClick={closeAll} className="rounded-lg px-3 py-2.5 font-semibold hover:bg-navy-800">
+              Contact Us
+            </NavLink>
+          </nav>
+
+          <div className="mt-4 border-t border-navy-800 pt-4">
+            {isLoggedIn ? (
+              <div className="flex flex-col gap-1">
+                <div className="mb-2 flex items-center gap-3 px-3">
+                  <Avatar className="bg-brand-600 font-semibold">{initials}</Avatar>
+                  <div>
+                    <p className="text-sm font-semibold">
+                      {user[0]?.first_name} {user[0]?.last_name}
+                    </p>
+                    <p className="text-xs text-brand-400">
+                      Balance {formatINR(tokenBalance)}
+                    </p>
+                  </div>
+                </div>
+                <NavLink to="/carts" onClick={closeAll} className="flex items-center justify-between rounded-lg px-3 py-2.5 font-semibold hover:bg-navy-800">
+                  Cart
+                  {cartCount > 0 && (
+                    <span className="rounded-full bg-brand-600 px-2 py-0.5 text-xs font-bold">
+                      {cartCount}
+                    </span>
+                  )}
+                </NavLink>
+                <NavLink to="/paymenthistory" onClick={closeAll} className="rounded-lg px-3 py-2.5 font-semibold hover:bg-navy-800">
+                  View Purchases
+                </NavLink>
+                {user[0]?.isAdmin && (
+                  <NavLink to="/admin" onClick={closeAll} className="rounded-lg px-3 py-2.5 font-semibold hover:bg-navy-800">
+                    Admin Dashboard
+                  </NavLink>
+                )}
+                <button
+                  onClick={() => { closeAll(); logout(); }}
+                  className="mt-3 rounded-lg bg-brand-600 px-3 py-2.5 font-semibold text-white hover:bg-brand-700"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <NavLink
+                to="/login"
+                onClick={closeAll}
+                className="block rounded-lg bg-brand-600 px-3 py-3 text-center font-semibold text-white hover:bg-brand-700"
+              >
+                Login
+              </NavLink>
+            )}
+          </div>
+        </div>
+      </Drawer>
+    </header>
   );
 }

@@ -1,81 +1,111 @@
+import { Link } from "react-router-dom";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import TwitterIcon from "@mui/icons-material/Twitter";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+
+const shopLinks = [
+  { label: "Home", to: "/" },
+  { label: "Boxing Gloves", to: "/" },
+  { label: "Protective Gear", to: "/" },
+  { label: "New Arrivals", to: "/" },
+];
+
+const companyLinks = [
+  { label: "About Us", to: "/about" },
+  { label: "Contact", to: "/contact" },
+  { label: "Careers", to: "/about" },
+  { label: "Support", to: "/contact" },
+];
+
+const supportLinks = [
+  { label: "My Account", to: "/paymenthistory" },
+  { label: "Order Tracking", to: "/paymenthistory" },
+  { label: "Shipping & Returns", to: "/contact" },
+  { label: "FAQs", to: "/contact" },
+];
+
+function LinkColumn({ title, links }) {
+  return (
+    <div>
+      <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">
+        {title}
+      </h3>
+      <ul className="space-y-2.5">
+        {links.map((link) => (
+          <li key={link.label}>
+            <Link
+              to={link.to}
+              className="text-sm text-navy-300 transition hover:text-brand-400"
+            >
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function Footer() {
   return (
-    <footer className="text-gray-400 bg-gray-900 body-font sticky w-full">
-      <div className="container p-4 mx-auto flex items-center sm:flex-row flex-col">
-        <a className="flex title-font font-medium items-center md:justify-start justify-center text-white">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            className="w-10 h-10 text-white p-2 bg-indigo-500 rounded-full"
-            viewBox="0 0 24 24"
-          >
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-          </svg>
-          <span className="ml-3 text-xl">StrikeShield</span>
-        </a>
+    <footer className="bg-navy-900 text-navy-300">
+      <div className="container-page grid grid-cols-2 gap-10 py-14 md:grid-cols-4 lg:grid-cols-5">
+        {/* Brand */}
+        <div className="col-span-2">
+          <div className="flex items-center gap-2">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                viewBox="0 0 24 24"
+                className="h-6 w-6 text-white"
+                aria-hidden="true"
+              >
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+              </svg>
+            </span>
+            <span className="font-display text-2xl tracking-wider text-white">
+              STRIKESHIELD
+            </span>
+          </div>
+          <p className="mt-4 max-w-xs text-sm leading-relaxed">
+            Premium boxing and combat gear built for fighters who demand the
+            best. Train harder, hit harder, stay protected.
+          </p>
+          <div className="mt-6 flex gap-3">
+            {[
+              { Icon: FacebookIcon, label: "Facebook" },
+              { Icon: TwitterIcon, label: "Twitter" },
+              { Icon: InstagramIcon, label: "Instagram" },
+              { Icon: LinkedInIcon, label: "LinkedIn" },
+            ].map(({ Icon, label }) => (
+              <a
+                key={label}
+                href="#"
+                aria-label={label}
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy-800 text-navy-300 transition hover:bg-brand-600 hover:text-white"
+              >
+                <Icon fontSize="small" />
+              </a>
+            ))}
+          </div>
+        </div>
 
-        <span className="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
-          <a className="text-gray-400">
-            <svg
-              fill="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="w-5 h-5"
-              viewBox="0 0 24 24"
-            >
-              <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"></path>
-            </svg>
-          </a>
-          <a className="ml-3 text-gray-400">
-            <svg
-              fill="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="w-5 h-5"
-              viewBox="0 0 24 24"
-            >
-              <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"></path>
-            </svg>
-          </a>
-          <a className="ml-3 text-gray-400">
-            <svg
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="w-5 h-5"
-              viewBox="0 0 24 24"
-            >
-              <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
-              <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zm1.5-4.87h.01"></path>
-            </svg>
-          </a>
-          <a className="ml-3 text-gray-400">
-            <svg
-              fill="currentColor"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="0"
-              className="w-5 h-5"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke="none"
-                d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"
-              ></path>
-              <circle cx="4" cy="4" r="2" stroke="none"></circle>
-            </svg>
-          </a>
-        </span>
+        <LinkColumn title="Shop" links={shopLinks} />
+        <LinkColumn title="Company" links={companyLinks} />
+        <LinkColumn title="Support" links={supportLinks} />
+      </div>
+
+      <div className="border-t border-navy-800">
+        <div className="container-page flex flex-col items-center justify-between gap-2 py-5 text-xs text-navy-400 sm:flex-row">
+          <p>© {new Date().getFullYear()} StrikeShield. All rights reserved.</p>
+          <p>Built as a portfolio MERN project.</p>
+        </div>
       </div>
     </footer>
   );

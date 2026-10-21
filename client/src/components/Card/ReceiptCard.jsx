@@ -1,74 +1,84 @@
+import { formatINR } from "../../utils/format.js";
 
 export default function ReceiptCard({
   paymentId,
-  orderDetails = [{}, {}],
+  orderDetails = [],
   discountApplied,
   deliveryCost,
   finalAmount,
 }) {
+  const list = Array.isArray(orderDetails) ? orderDetails : [];
+
   return (
-    <div className="max-w-lg mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
-      <div className="bg-gradient-to-r from-red-600 to-orange-400 text-white p-6">
-        <h2 className="text-2xl font-bold">Payment Receipt</h2>
-        <p className="text-lg mt-2">
-          Reference Number: {paymentId || "djfkdljfldjf"}
+    <div className="overflow-hidden rounded-2xl border border-navy-100 bg-white">
+      <div className="bg-navy-900 p-6 text-white">
+        <h2 className="font-display text-2xl tracking-wide">Payment Receipt</h2>
+        <p className="mt-1 text-sm text-navy-300">
+          Reference: <span className="font-mono">{paymentId || "—"}</span>
         </p>
       </div>
 
       <div className="p-6">
-        <h3 className="text-xl font-semibold mb-4">Order Details</h3>
-        <table className="w-full table-auto border-collapse">
+        <h3 className="mb-3 text-lg font-bold text-navy-900">Order Details</h3>
+        <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-gray-100">
-              <th className="border p-3 text-left">Product Name</th>
-              <th className="border p-3 text-left">Price</th>
-              <th className="border p-3 text-left">Quantity</th>
+            <tr className="bg-navy-50 text-left text-sm uppercase tracking-wider text-navy-500">
+              <th className="p-3">Product</th>
+              <th className="p-3">Price</th>
+              <th className="p-3 text-center">Qty</th>
+              <th className="p-3 text-right">Amount</th>
             </tr>
           </thead>
-          <tbody>
-            {orderDetails.map((item) => (
-              <tr key={item.productData.id} className="border-t">
-                <td className="border p-3">
-                  {item.productData.name || "product name"}
+          <tbody className="divide-y divide-navy-100">
+            {list.map((item, i) => (
+              <tr key={item?.productData?.id || i}>
+                <td className="p-3 font-medium text-navy-900">
+                  {item?.productData?.name || "Product"}
                 </td>
-                <td className="border p-3">₹{item.productData.price || 3}</td>
-                <td className="border p-3">{item.quantity || 55555553}</td>
+                <td className="p-3 text-navy-600">
+                  {formatINR(item?.productData?.price)}
+                </td>
+                <td className="p-3 text-center text-navy-600">
+                  {item?.quantity ?? 0}
+                </td>
+                <td className="p-3 text-right font-semibold text-navy-900">
+                  {formatINR((item?.productData?.price || 0) * (item?.quantity || 0))}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        {discountApplied ? (
-          <div className="flex justify-between text-gray-700 my-3">
-            <span className="text-lg">Discount Applied:</span>
-            <span className="text-lg">10%</span>
+        <div className="mt-5 space-y-2 border-t border-navy-100 pt-4 text-navy-700">
+          <div className="flex justify-between">
+            <span>GST Applied (3%)</span>
+            <span>Included</span>
           </div>
-        ) : (
-          ""
-        )}
-        {deliveryCost ? (
-          <div className="flex justify-between text-gray-700 mb-3">
-            <span className="text-lg">Delivery Cost:</span>
-            <span className="text-lg">₹50</span>
-          </div>
-        ) : (
-          ""
-        )}
-        <div className="mt-6">
-          <div className="flex justify-between text-gray-700 mb-3">
-            <span className="text-lg">GST Applied:</span>
-            <span className="text-lg">3%</span>
-          </div>
-
-          <div className="flex justify-between text-gray-900 font-bold text-xl mt-4">
-            <span>Final Amount:</span>
-            <span>₹{finalAmount || 5555550}</span>
+          {discountApplied ? (
+            <div className="flex justify-between text-green-600">
+              <span>Bulk Discount</span>
+              <span>10% off</span>
+            </div>
+          ) : null}
+          {deliveryCost ? (
+            <div className="flex justify-between">
+              <span>Delivery Cost</span>
+              <span>{formatINR(deliveryCost)}</span>
+            </div>
+          ) : null}
+          <div className="flex items-center justify-between border-t border-navy-100 pt-3 text-navy-900">
+            <span className="text-lg font-bold">Final Amount</span>
+            <span className="text-2xl font-extrabold">
+              {formatINR(finalAmount)}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="bg-red-100  p-4 text-center">
-        <p className="text-md font-bold text-green-900">Thank you for your purchase!</p>
+      <div className="bg-brand-50 p-4 text-center">
+        <p className="text-sm font-semibold text-brand-800">
+          Thank you for shopping with StrikeShield!
+        </p>
       </div>
     </div>
   );
