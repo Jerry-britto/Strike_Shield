@@ -20,7 +20,7 @@ const router = Router();
 router.route("/addproduct").post(verifyJwt, verifyAdmin, addProduct);
 
 // set products
-router.route("/setdefaultproducts").post(setDefaultProduct);
+router.route("/setdefaultproducts").post(verifyJwt, verifyAdmin, setDefaultProduct);
 
 // get product by id
 router.route("/getproduct/:pid").get(getProductById);

@@ -4,9 +4,20 @@ import { store } from "../store/store.js";
 import { removeUser, setCartCount } from "../store/slice.js";
 
 // Central axios instance so the API base URL and credential handling live in
-// exactly one place. Falls back to the local dev server when no env var is set.
+// exactly one place.
+// - VITE_API_URL overrides everything (escape hatch for a split deploy).
+// - Dev: explicit localhost URL (Vite runs on :5173, API on :8000).
+// - Prod (single-origin): the client is served BY the API host, so an empty
+//   baseURL makes every call relative → same origin automatically. No env var
+//   needed on the deploy host.
+// NOTE: deliberately NOT `VITE_API_URL || "http://localhost:8000"` — that
+// pattern would send prod traffic to the visitor's own localhost whenever the
+// var is unset/empty.
+const baseURL =
+  import.meta.env.VITE_API_URL ??
+  (import.meta.env.DEV ? "http://localhost:8000/api/v1" : "");
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1",
+  baseURL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
