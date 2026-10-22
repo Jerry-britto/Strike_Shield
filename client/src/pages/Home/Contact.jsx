@@ -10,7 +10,7 @@ import api from "../../api/axios.js";
 
 const contactInfo = [
   { Icon: EmailIcon, label: "Email", value: "support@strikeship.com" },
-  { Icon: PhoneIcon, label: "Phone", value: "+91 98765 43210" },
+  { Icon: PhoneIcon, label: "Phone", value: "+91 XXXX XXXXX" },
   { Icon: LocationOnIcon, label: "Address", value: "Mumbai, Maharashtra, India" },
 ];
 

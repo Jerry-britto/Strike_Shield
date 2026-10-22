@@ -7,15 +7,16 @@ import { removeUser, setCartCount } from "../store/slice.js";
 // exactly one place.
 // - VITE_API_URL overrides everything (escape hatch for a split deploy).
 // - Dev: explicit localhost URL (Vite runs on :5173, API on :8000).
-// - Prod (single-origin): the client is served BY the API host, so an empty
-//   baseURL makes every call relative → same origin automatically. No env var
-//   needed on the deploy host.
+// - Prod (single-origin): the client is served BY the API host, so a RELATIVE
+//   "/api/v1" prefix keeps every call on the same origin. Call sites use paths
+//   like "/user/login" — the "/api/v1" prefix lives HERE, so it must never be
+//   "" (that would request /user/login at the site root → SPA fallback/404).
 // NOTE: deliberately NOT `VITE_API_URL || "http://localhost:8000"` — that
 // pattern would send prod traffic to the visitor's own localhost whenever the
 // var is unset/empty.
 const baseURL =
   import.meta.env.VITE_API_URL ??
-  (import.meta.env.DEV ? "http://localhost:8000/api/v1" : "");
+  (import.meta.env.DEV ? "http://localhost:8000/api/v1" : "/api/v1");
 const api = axios.create({
   baseURL,
   withCredentials: true,
