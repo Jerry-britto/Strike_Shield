@@ -69,4 +69,33 @@ app.use("/api/v1/orders",orderRouter)
 import adminRouter from "./routes/admin.routes.js";
 app.use("/api/v1/admin",adminRouter)
 
+// --- Single-origin deploy: serve the built client (client/dist) -------------
+// Must come AFTER all /api/v1 routes so unknown API paths still 404 properly
+// instead of falling back to index.html.
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const clientDist = path.join(__dirname, "../../client/dist");
+
+// static assets; index.html (and SPA deep-links below) handled by the fallback
+app.use(express.static(clientDist));
+
+// API 404s must stay JSON — without this, unknown /api paths would be
+// swallowed by the SPA fallback below and answer 200 text/html.
+app.use("/api", (req, res) => {
+  res.status(404).json({ message: "API endpoint not found" });
+});
+
+// SPA fallback: any GET that isn't an API route gets index.html so client-side
+// routes like /product/<id> survive a refresh. (Express 4 "*" syntax; Express
+// 5 would need "{*splat}".) Skipped when the build is absent (pure-dev runs:
+// Vite serves the client on :5173, Express only the API).
+app.get("*", (req, res, next) => {
+  const indexHtml = path.join(clientDist, "index.html");
+  if (!fs.existsSync(indexHtml)) return next();
+  res.sendFile(indexHtml);
+});
+
 export default app

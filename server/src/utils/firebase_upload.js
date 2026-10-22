@@ -4,16 +4,27 @@ import uuid4 from "uuid4";
 import fs from "fs"
 
 initializeApp({
-  apiKey: "AIzaSyAEEgrqKqahjV-6u0bPfLr-jW2N4f3OWXE",
-  authDomain: "ecomm-ead9f.firebaseapp.com",
-  projectId: "ecomm-ead9f",
-  storageBucket: "ecomm-ead9f.appspot.com",
-  messagingSenderId: "357664437025",
-  appId: "1:357664437025:web:8bab11f75b37d84f514460",
-  measurementId: "G-NQ2Z45B3BG",
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APPID,
+  measurementId: process.env.FIREBASE_MEASUREMENTID,
 });
 
 const storage = getStorage();
+
+// Second call throws if the temp file is already gone (e.g. upload failed
+// before the file existed, or cleanup raced) — never let cleanup mask the
+// real error.
+const cleanupTempFile = (p) => {
+  try {
+    if (p && fs.existsSync(p)) fs.unlinkSync(p);
+  } catch {
+    /* best-effort cleanup */
+  }
+};
 
 export const uploadToFirebase = async (localPath, type) => {
   try {
@@ -29,11 +40,11 @@ export const uploadToFirebase = async (localPath, type) => {
 
     const downloadUrl = await getDownloadURL(snapShot.ref);
     console.log(`Your downoload url ${downloadUrl}`);
-    fs.unlinkSync(localPath);
-    
+    cleanupTempFile(localPath);
+
     return downloadUrl;
   } catch (error) {
     console.log("Error occured due to ", error);
-    fs.unlinkSync(localPath);
+    cleanupTempFile(localPath);
   }
 };

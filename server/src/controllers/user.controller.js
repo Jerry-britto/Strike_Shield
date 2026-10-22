@@ -29,6 +29,15 @@ export async function registerUser(req, res) {
         .json({ message: "Your passwords are not matching", success: false });
     }
 
+    // Server-side source of truth for password strength (client mirrors this
+    // for instant feedback, but can be bypassed).
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters",
+        success: false,
+      });
+    }
+
     const userExists = await User.findOne({ email });
 
     if (userExists) {

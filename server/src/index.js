@@ -1,10 +1,9 @@
-import dotenv from "dotenv";
+// MUST be the first import: ESM evaluates dependencies before this file's
+// body, so the old `dotenv.config()` call below the imports ran AFTER
+// firebase_upload.js had already read process.env at module scope.
+import "dotenv/config";
 import app from "./app.js";
 import { connectToDb } from "./db/connect.js";
-
-dotenv.config({
-  path: ".env",
-});
 
 const PORT = process.env.PORT || 4000;
 

@@ -140,10 +140,16 @@ export default function Register() {
                   error={!!errors.password}
                   helperText={
                     errors.password
-                      ? "Password must be at least 6 characters"
+                      ? "Password must be at least 8 characters"
                       : ""
                   }
-                  {...register("password", { required: true, minLength: 6 })}
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 8,
+                      message: "Password must be at least 8 characters",
+                    },
+                  })}
                 />
               </div>
 
@@ -154,7 +160,13 @@ export default function Register() {
                   fullWidth
                   error={!!errors.cpassword}
                   helperText={errors.cpassword ? "Please confirm password" : ""}
-                  {...register("cpassword", { required: true, minLength: 6 })}
+                  {...register("cpassword", {
+                    required: "Please confirm password",
+                    minLength: {
+                      value: 8,
+                      message: "Password must be at least 8 characters",
+                    },
+                  })}
                 />
                 <div className="mt-1 flex items-center gap-1 text-sm text-navy-600">
                   <IconButton
