@@ -66,6 +66,8 @@ app.use("/api/v1/cart",cartRouter)
 import orderRouter from "./routes/order.routes.js"
 app.use("/api/v1/orders",orderRouter)
 
+app.get("/health", (_, res) => res.status(200).json({ message: "Server is healthy" }));
+
 import adminRouter from "./routes/admin.routes.js";
 app.use("/api/v1/admin",adminRouter)
 
